@@ -77,7 +77,7 @@ local nGrade
 						If nPosDezenas <= Len( pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ] )
 							aDezenas[ nLinDezenas ][ nColDezenas ] := pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ][ nPosDezenas ]
 						Else
-							aDezenas[ nLinDezenas ][ nColDezenas ] := '  '
+							aDezenas[ nLinDezenas ][ nColDezenas ] := Space(2)
 						EndIf
 						nPosDezenas++
 					next
@@ -933,16 +933,16 @@ memvar xCount, xTemp
 
 				while lContinua
 
-					@ oWindow:nTop+ 1, oWindow:nLeft+14	GET     pDSA_CONCURSO                            ;
-														WHEN    pFALSE		                             ;
-														PICT    '@!'                                     ;
-														CAPTION 'Concurso'                               ;
+					@ oWindow:nTop+ 1, oWindow:nLeft+14	GET     pDSA_CONCURSO                                  ;
+														WHEN    pFALSE		                                   ;
+														PICT    '@!'                                           ;
+														CAPTION 'Concurso'                                     ;
 														COLOR   SysFieldGet()
 
-					@ oWindow:nTop+ 1, oWindow:nLeft+30	GET     pDSA_SORTEIO                             ;
-														VALID   .not. Empty( pDSA_SORTEIO )              ;
-														PICT    '@KD 99/99/99'                           ;
-														CAPTION 'Sorteio'                                ;
+					@ oWindow:nTop+ 1, oWindow:nLeft+30	GET     pDSA_SORTEIO                                   ;
+														VALID   .not. Empty( pDSA_SORTEIO )                    ;
+														PICT    '@KD 99/99/99'                                 ;
+														CAPTION 'Sorteio'                                      ;
 														COLOR   SysFieldGet()
 
 
@@ -950,40 +950,40 @@ memvar xCount, xTemp
 								oWindow:nTop+ 3, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
 					hb_DispOutAt( oWindow:nTop+ 3, oWindow:nLeft+ 2, ' Primeiro Sorteio ', SystemLabelColor() )
 
-					@ oWindow:nTop+ 4, oWindow:nLeft+12	GET   pDSA_DEZENA_1_01                           ;
-														VALID .not. Empty( pDSA_DEZENA_1_01 )            ;
-														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2))  ;
-														PICT  '@K 99'                                    ;
+					@ oWindow:nTop+ 4, oWindow:nLeft+12	GET   pDSA_DEZENA_1_01                                ;
+														VALID .not. Empty( pDSA_DEZENA_1_01 )                 ;
+														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2)) ;
+														PICT  '@K 99'                                         ;
 														COLOR SysFieldGet()
 
-					@ oWindow:nTop+ 4, oWindow:nLeft+16	GET   pDSA_DEZENA_1_02                           ;
-														VALID .not. Empty( pDSA_DEZENA_1_02 )            ;
-														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2))  ;
-														PICT  '@K 99'                                    ;
+					@ oWindow:nTop+ 4, oWindow:nLeft+16	GET   pDSA_DEZENA_1_02                                ;
+														VALID .not. Empty( pDSA_DEZENA_1_02 )                 ;
+														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2)) ;
+														PICT  '@K 99'                                         ;
 														COLOR SysFieldGet()
 
-					@ oWindow:nTop+ 4, oWindow:nLeft+20	GET   pDSA_DEZENA_1_03                           ;
-														VALID .not. Empty( pDSA_DEZENA_1_03 )            ;
-														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2))  ;
-														PICT  '@K 99'                                    ;
+					@ oWindow:nTop+ 4, oWindow:nLeft+20	GET   pDSA_DEZENA_1_03                                ;
+														VALID .not. Empty( pDSA_DEZENA_1_03 )                 ;
+														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2)) ;
+														PICT  '@K 99'                                         ;
 														COLOR SysFieldGet()
 
-					@ oWindow:nTop+ 4, oWindow:nLeft+24	GET   pDSA_DEZENA_1_04                           ;
-														VALID .not. Empty( pDSA_DEZENA_1_04 )            ;
-														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2))  ;
-														PICT  '@K 99'                                    ;
+					@ oWindow:nTop+ 4, oWindow:nLeft+24	GET   pDSA_DEZENA_1_04                                ;
+														VALID .not. Empty( pDSA_DEZENA_1_04 )                 ;
+														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2)) ;
+														PICT  '@K 99'                                         ;
 														COLOR SysFieldGet()
 
-					@ oWindow:nTop+ 4, oWindow:nLeft+28	GET   pDSA_DEZENA_1_05                           ;
-														VALID .not. Empty( pDSA_DEZENA_1_05 )            ;
-														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2))  ;
-														PICT  '@K 99'                                    ;
+					@ oWindow:nTop+ 4, oWindow:nLeft+28	GET   pDSA_DEZENA_1_05                                ;
+														VALID .not. Empty( pDSA_DEZENA_1_05 )                 ;
+														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2)) ;
+														PICT  '@K 99'                                         ;
 														COLOR SysFieldGet()
 
-					@ oWindow:nTop+ 4, oWindow:nLeft+32	GET   pDSA_DEZENA_1_06                           ;
-														VALID .not. Empty( pDSA_DEZENA_1_06 )            ;
-														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2))  ;
-														PICT  '@K 99'                                    ;
+					@ oWindow:nTop+ 4, oWindow:nLeft+32	GET   pDSA_DEZENA_1_06                                ;
+														VALID .not. Empty( pDSA_DEZENA_1_06 )                 ;
+														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2)) ;
+														PICT  '@K 99'                                         ;
 														COLOR SysFieldGet()
 
 
@@ -991,40 +991,40 @@ memvar xCount, xTemp
 								oWindow:nTop+ 6, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
 					hb_DispOutAt( oWindow:nTop+ 6, oWindow:nLeft+ 2, ' Segundo Sorteio ', SystemLabelColor() )
 
-					@ oWindow:nTop+ 7, oWindow:nLeft+12	GET   pDSA_DEZENA_2_01                           ;
-														VALID .not. Empty( pDSA_DEZENA_2_01 )            ;
-														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2))  ;
-														PICT  '@K 99'                                    ;
+					@ oWindow:nTop+ 7, oWindow:nLeft+12	GET   pDSA_DEZENA_2_01                                ;
+														VALID .not. Empty( pDSA_DEZENA_2_01 )                 ;
+														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2)) ;
+														PICT  '@K 99'                                         ;
 														COLOR SysFieldGet()
 
-					@ oWindow:nTop+ 7, oWindow:nLeft+16	GET   pDSA_DEZENA_2_02                           ;
-														VALID .not. Empty( pDSA_DEZENA_2_02 )            ;
-														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2))  ;
-														PICT  '@K 99'                                    ;
+					@ oWindow:nTop+ 7, oWindow:nLeft+16	GET   pDSA_DEZENA_2_02                                ;
+														VALID .not. Empty( pDSA_DEZENA_2_02 )                 ;
+														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2)) ;
+														PICT  '@K 99'                                         ;
 														COLOR SysFieldGet()
 
-					@ oWindow:nTop+ 7, oWindow:nLeft+20	GET   pDSA_DEZENA_2_03                           ;
-														VALID .not. Empty( pDSA_DEZENA_2_03 )            ;
-														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2))  ;
-														PICT  '@K 99'                                    ;
+					@ oWindow:nTop+ 7, oWindow:nLeft+20	GET   pDSA_DEZENA_2_03                                ;
+														VALID .not. Empty( pDSA_DEZENA_2_03 )                 ;
+														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2)) ;
+														PICT  '@K 99'                                         ;
 														COLOR SysFieldGet()
 
-					@ oWindow:nTop+ 7, oWindow:nLeft+24	GET   pDSA_DEZENA_2_04                           ;
-														VALID .not. Empty( pDSA_DEZENA_2_04 )            ;
-														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2))  ;
-														PICT  '@K 99'                                    ;
+					@ oWindow:nTop+ 7, oWindow:nLeft+24	GET   pDSA_DEZENA_2_04                                ;
+														VALID .not. Empty( pDSA_DEZENA_2_04 )                 ;
+														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2)) ;
+														PICT  '@K 99'                                         ;
 														COLOR SysFieldGet()
 
-					@ oWindow:nTop+ 7, oWindow:nLeft+28	GET   pDSA_DEZENA_2_05                           ;
-														VALID .not. Empty( pDSA_DEZENA_2_05 )            ;
-														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2))  ;
-														PICT  '@K 99'                                    ;
+					@ oWindow:nTop+ 7, oWindow:nLeft+28	GET   pDSA_DEZENA_2_05                                ;
+														VALID .not. Empty( pDSA_DEZENA_2_05 )                 ;
+														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2)) ;
+														PICT  '@K 99'                                         ;
 														COLOR SysFieldGet()
 
-					@ oWindow:nTop+ 7, oWindow:nLeft+32	GET   pDSA_DEZENA_2_06                           ;
-														VALID .not. Empty( pDSA_DEZENA_2_06 )            ;
-														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2))  ;
-														PICT  '@K 99'                                    ;
+					@ oWindow:nTop+ 7, oWindow:nLeft+32	GET   pDSA_DEZENA_2_06                                ;
+														VALID .not. Empty( pDSA_DEZENA_2_06 )                 ;
+														SEND  VarPut(StrZero(Val(ATail(GetList):VarGet()),2)) ;
+														PICT  '@K 99'                                         ;
 														COLOR SysFieldGet()
 
 
@@ -1032,55 +1032,55 @@ memvar xCount, xTemp
 								oWindow:nTop+ 9, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
 					hb_DispOutAt( oWindow:nTop+ 9, oWindow:nLeft+ 2, ' Premio Primeiro Sorteio ', SystemLabelColor() )
 
-					@ oWindow:nTop+10, oWindow:nLeft+12	SAY   'Ganhadores'                               ;
+					@ oWindow:nTop+10, oWindow:nLeft+12	SAY   'Ganhadores'                                    ;
 														COLOR SystemLabelColor()
 
-					@ oWindow:nTop+10, oWindow:nLeft+30	SAY   'Premio'                                   ;
+					@ oWindow:nTop+10, oWindow:nLeft+30	SAY   'Premio'                                        ;
 														COLOR SystemLabelColor()
 
-					@ oWindow:nTop+11, oWindow:nLeft+10	GET     pDSA_ACERTO_1_SENA                       ;
-														PICT    '@EN 9,999,999,999'                      ;
-														CAPTION 'Sena'                                   ;
-														COLOR   SysFieldGet()                            ;
+					@ oWindow:nTop+11, oWindow:nLeft+10	GET     pDSA_ACERTO_1_SENA                            ;
+														PICT    '@EN 9,999,999,999'                           ;
+														CAPTION 'Sena'                                        ;
+														COLOR   SysFieldGet()                                 ;
 														WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '06', pDSA_SORTEIO )
 
-					@ oWindow:nTop+12, oWindow:nLeft+10	GET     pDSA_ACERTO_1_QUINA                      ;
-														PICT    '@EN 9,999,999,999'                      ;
-														CAPTION 'Quina'                                  ;
-														COLOR   SysFieldGet()                            ;
+					@ oWindow:nTop+12, oWindow:nLeft+10	GET     pDSA_ACERTO_1_QUINA                           ;
+														PICT    '@EN 9,999,999,999'                           ;
+														CAPTION 'Quina'                                       ;
+														COLOR   SysFieldGet()                                 ;
 														WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '05', pDSA_SORTEIO )
 
-					@ oWindow:nTop+13, oWindow:nLeft+10	GET     pDSA_ACERTO_1_QUADRA                     ;
-														PICT    '@EN 9,999,999,999'                      ;
-														CAPTION 'Quadra'                                 ;
-														COLOR   SysFieldGet()                            ;
+					@ oWindow:nTop+13, oWindow:nLeft+10	GET     pDSA_ACERTO_1_QUADRA                          ;
+														PICT    '@EN 9,999,999,999'                           ;
+														CAPTION 'Quadra'                                      ;
+														COLOR   SysFieldGet()                                 ;
 														WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '04', pDSA_SORTEIO )
 
-					@ oWindow:nTop+14, oWindow:nLeft+10	GET     pDSA_ACERTO_1_TERNO                      ;
-														PICT    '@EN 9,999,999,999'                      ;
-														CAPTION 'Terno'                                  ;
-														COLOR   SysFieldGet()                            ;
+					@ oWindow:nTop+14, oWindow:nLeft+10	GET     pDSA_ACERTO_1_TERNO                           ;
+														PICT    '@EN 9,999,999,999'                           ;
+														CAPTION 'Terno'                                       ;
+														COLOR   SysFieldGet()                                 ;
 														WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '03', pDSA_SORTEIO )
 
 
-					@ oWindow:nTop+11, oWindow:nLeft+24	GET   pDSA_PREMIO_1_SENA                         ;
-														PICT  '@EN 99,999,999,999.99'                    ;
-														COLOR SysFieldGet()                              ;
+					@ oWindow:nTop+11, oWindow:nLeft+24	GET   pDSA_PREMIO_1_SENA                              ;
+														PICT  '@EN 99,999,999,999.99'                         ;
+														COLOR SysFieldGet()                                   ;
 														WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '06', pDSA_SORTEIO )
 
-					@ oWindow:nTop+12, oWindow:nLeft+24	GET   pDSA_PREMIO_1_QUINA                        ;
-														PICT  '@EN 99,999,999,999.99'                    ;
-														COLOR SysFieldGet()                              ;
+					@ oWindow:nTop+12, oWindow:nLeft+24	GET   pDSA_PREMIO_1_QUINA                             ;
+														PICT  '@EN 99,999,999,999.99'                         ;
+														COLOR SysFieldGet()                                   ;
 														WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '05', pDSA_SORTEIO )
 
-					@ oWindow:nTop+13, oWindow:nLeft+24	GET   pDSA_PREMIO_1_QUADRA                       ;
-														PICT  '@EN 99,999,999,999.99'                    ;
-														COLOR SysFieldGet()                              ;
+					@ oWindow:nTop+13, oWindow:nLeft+24	GET   pDSA_PREMIO_1_QUADRA                            ;
+														PICT  '@EN 99,999,999,999.99'                         ;
+														COLOR SysFieldGet()                                   ;
 														WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '04', pDSA_SORTEIO )
 
-					@ oWindow:nTop+14, oWindow:nLeft+24	GET   pDSA_PREMIO_1_TERNO                        ;
-														PICT  '@EN 99,999,999,999.99'                    ;
-														COLOR SysFieldGet()                              ;
+					@ oWindow:nTop+14, oWindow:nLeft+24	GET   pDSA_PREMIO_1_TERNO                             ;
+														PICT  '@EN 99,999,999,999.99'                         ;
+														COLOR SysFieldGet()                                   ;
 														WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '03', pDSA_SORTEIO )
 
 
@@ -1088,71 +1088,71 @@ memvar xCount, xTemp
 								oWindow:nTop+16, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
 					hb_DispOutAt( oWindow:nTop+16, oWindow:nLeft+ 2, ' Premio Segundo Sorteio ', SystemLabelColor() )
 
-					@ oWindow:nTop+17, oWindow:nLeft+12	SAY   'Ganhadores'                               ;
+					@ oWindow:nTop+17, oWindow:nLeft+12	SAY   'Ganhadores'                                    ;
 														COLOR SystemLabelColor()
 
-					@ oWindow:nTop+17, oWindow:nLeft+30	SAY   'Premio'                                   ;
+					@ oWindow:nTop+17, oWindow:nLeft+30	SAY   'Premio'                                        ;
 														COLOR SystemLabelColor()
 
-					@ oWindow:nTop+18, oWindow:nLeft+10	GET     pDSA_ACERTO_2_SENA                       ;
-														PICT    '@EN 9,999,999,999'                      ;
-														CAPTION 'Sena'                                   ;
-														COLOR   SysFieldGet()                            ;
+					@ oWindow:nTop+18, oWindow:nLeft+10	GET     pDSA_ACERTO_2_SENA                            ;
+														PICT    '@EN 9,999,999,999'                           ;
+														CAPTION 'Sena'                                        ;
+														COLOR   SysFieldGet()                                 ;
 														WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '06', pDSA_SORTEIO )
 
-					@ oWindow:nTop+19, oWindow:nLeft+10	GET     pDSA_ACERTO_2_QUINA                      ;
-														PICT    '@EN 9,999,999,999'                      ;
-														CAPTION 'Quina'                                  ;
-														COLOR   SysFieldGet()                            ;
+					@ oWindow:nTop+19, oWindow:nLeft+10	GET     pDSA_ACERTO_2_QUINA                           ;
+														PICT    '@EN 9,999,999,999'                           ;
+														CAPTION 'Quina'                                       ;
+														COLOR   SysFieldGet()                                 ;
 														WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '05', pDSA_SORTEIO )
 
-					@ oWindow:nTop+20, oWindow:nLeft+10	GET     pDSA_ACERTO_2_QUADRA                     ;
-														PICT    '@EN 9,999,999,999'                      ;
-														CAPTION 'Quadra'                                 ;
-														COLOR   SysFieldGet()                            ;
+					@ oWindow:nTop+20, oWindow:nLeft+10	GET     pDSA_ACERTO_2_QUADRA                          ;
+														PICT    '@EN 9,999,999,999'                           ;
+														CAPTION 'Quadra'                                      ;
+														COLOR   SysFieldGet()                                 ;
 														WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '04', pDSA_SORTEIO )
 
-					@ oWindow:nTop+21, oWindow:nLeft+10	GET     pDSA_ACERTO_2_TERNO                      ;
-														PICT    '@EN 9,999,999,999'                      ;
-														CAPTION 'Terno'                                  ;
-														COLOR   SysFieldGet()                            ;
+					@ oWindow:nTop+21, oWindow:nLeft+10	GET     pDSA_ACERTO_2_TERNO                           ;
+														PICT    '@EN 9,999,999,999'                           ;
+														CAPTION 'Terno'                                       ;
+														COLOR   SysFieldGet()                                 ;
 														WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '03', pDSA_SORTEIO )
 
 
-					@ oWindow:nTop+18, oWindow:nLeft+24	GET   pDSA_PREMIO_2_SENA                         ;
-														PICT  '@EN 99,999,999,999.99'                    ;
-														COLOR SysFieldGet()                              ;
+					@ oWindow:nTop+18, oWindow:nLeft+24	GET   pDSA_PREMIO_2_SENA                              ;
+														PICT  '@EN 99,999,999,999.99'                         ;
+														COLOR SysFieldGet()                                   ;
 														WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '06', pDSA_SORTEIO )
 
-					@ oWindow:nTop+19, oWindow:nLeft+24	GET   pDSA_PREMIO_2_QUINA                        ;
-														PICT  '@EN 99,999,999,999.99'                    ;
-														COLOR SysFieldGet()                              ;
+					@ oWindow:nTop+19, oWindow:nLeft+24	GET   pDSA_PREMIO_2_QUINA                             ;
+														PICT  '@EN 99,999,999,999.99'                         ;
+														COLOR SysFieldGet()                                   ;
 														WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '05', pDSA_SORTEIO )
 
-					@ oWindow:nTop+20, oWindow:nLeft+24	GET   pDSA_PREMIO_2_QUADRA                       ;
-														PICT  '@EN 99,999,999,999.99'                    ;
-														COLOR SysFieldGet()                              ;
+					@ oWindow:nTop+20, oWindow:nLeft+24	GET   pDSA_PREMIO_2_QUADRA                            ;
+														PICT  '@EN 99,999,999,999.99'                         ;
+														COLOR SysFieldGet()                                   ;
 														WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '04', pDSA_SORTEIO )
 
-					@ oWindow:nTop+21, oWindow:nLeft+24	GET   pDSA_PREMIO_2_TERNO                        ;
-														PICT  '@EN 99,999,999,999.99'                    ;
-														COLOR SysFieldGet()                              ;
+					@ oWindow:nTop+21, oWindow:nLeft+24	GET   pDSA_PREMIO_2_TERNO                             ;
+														PICT  '@EN 99,999,999,999.99'                         ;
+														COLOR SysFieldGet()                                   ;
 														WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '03', pDSA_SORTEIO )
 
 
 					hb_DispBox( oWindow:nBottom- 2, oWindow:nLeft+ 1, ;
 								oWindow:nBottom- 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
 
-					@ oWindow:nBottom- 1, oWindow:nRight-22	GET     lConfirma PUSHBUTTON                 ;
-															CAPTION ' Con&firma '                        ;
-															COLOR   SysPushButton()                      ;
-															STYLE   ''                                   ;
+					@ oWindow:nBottom- 1, oWindow:nRight-22	GET     lConfirma PUSHBUTTON                      ;
+															CAPTION ' Con&firma '                             ;
+															COLOR   SysPushButton()                           ;
+															STYLE   ''                                        ;
 															STATE   { || lContinua := pTRUE, GetActive():ExitState := GE_WRITE }
 
-					@ oWindow:nBottom- 1, oWindow:nRight-11	GET     lCancela  PUSHBUTTON                 ;
-															CAPTION ' Cance&lar '                        ;
-															COLOR   SysPushButton()                      ;
-															STYLE   ''                                   ;
+					@ oWindow:nBottom- 1, oWindow:nRight-11	GET     lCancela  PUSHBUTTON                      ;
+															CAPTION ' Cance&lar '                             ;
+															COLOR   SysPushButton()                           ;
+															STYLE   ''                                        ;
 															STATE   { || lContinua := pFALSE, GetActive():ExitState := GE_ESCAPE }
 
 					Set( _SET_CURSOR, SC_NORMAL )
