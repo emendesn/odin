@@ -76,7 +76,7 @@ local nGrade
 						If nPosDezenas <= Len( pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ] )
 							aDezenas[ nLinDezenas ][ nColDezenas ] := pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ][ nPosDezenas ]
 						Else
-							aDezenas[ nLinDezenas ][ nColDezenas ] := '  '
+							aDezenas[ nLinDezenas ][ nColDezenas ] := Space(2)
 						EndIf
 						nPosDezenas++
 					next
@@ -365,9 +365,9 @@ local oIniFile
 memvar xCount, xTemp
 
 
-If SystemConcurso() == pMEGA_SENA
+	If SystemConcurso() == pMEGA_SENA
 
-	If ( nPointer := AScan( pSTRU_SYSTEM, { |xJog| xJog[ pSTRU_JOGO ] == pMEGA_SENA } ) ) > 0
+		If ( nPointer := AScan( pSTRU_SYSTEM, { |xJog| xJog[ pSTRU_JOGO ] == pMEGA_SENA } ) ) > 0
 
 			begin sequence
 
@@ -1344,6 +1344,7 @@ local aTemp
 local oCombine
 local a, i
 local nPercComb
+
 
 	DEFAULT nQuantJogos   TO  1, ;
 			nQuantDezenas TO 15, ;
