@@ -45,7 +45,7 @@ local nLastKeyType  := hb_MilliSeconds()
 local nRefresh      := 1000              /* um segundo como defaul */
 local nCount        := 0
 local nMenuItem     := 1
-local nMaxItens     := 1
+local nMaxItens     := 0
 local lSair         := pFALSE
 local oWindow
 
@@ -127,32 +127,32 @@ local nPosDezenas   := 1
 					oBrwPartidas:autoLite       := 	pFALSE
 
 					
-					oColumn            := TBColumnNew( "",                      { || JOGOS->JOG_FAIXA } )
-					oColumn:picture    := "@!"
+					oColumn            := TBColumnNew( '',                      { || JOGOS->JOG_FAIXA } )
+					oColumn:picture    := '@!'
 					oColumn:width      := 02
 					oBrwPartidas:addColumn( oColumn )
 					
-					oColumn            := TBColumnNew( PadC( "Coluna 1", 20 ),  {|| PadL( iif( CLUBES->( dbSetOrder(1), dbSeek( JOGOS->JOG_COL_01 ) ),            ;
-																								AllTrim( CLUBES->CLU_ABREVI ) + "/" + ALLTRIM( CLUBES->CLU_UF ), ;
-																								"" ), 20 ) }                                                     )
-					oColumn:picture    := "@!"
+					oColumn            := TBColumnNew( PadC( 'Coluna 1', 20 ),  {|| PadL( iif( CLUBES->( dbSetOrder(1), dbSeek( JOGOS->JOG_COL_01 ) ),            ;
+																								AllTrim( CLUBES->CLU_ABREVI ) + '/' + AllTrim( CLUBES->CLU_UF ), ;
+																								'' ), 20 ) }                                                     )
+					oColumn:picture    := '@!'
 					oColumn:width      := 20
 					oBrwPartidas:addColumn( oColumn )
 					
-					oColumn            := TBColumnNew( "",                      {|| JOGOS->JOG_PON_01 } )
-					oColumn:picture    := "@!"
+					oColumn            := TBColumnNew( '',                      {|| JOGOS->JOG_PON_01 } )
+					oColumn:picture    := '@!'
 					oColumn:width      := 2
 					oBrwPartidas:addColumn( oColumn )
 					
-					oColumn            := TBColumnNew( "",                      {|| JOGOS->JOG_PON_02 } )
-					oColumn:picture    := "@!"
+					oColumn            := TBColumnNew( '',                      {|| JOGOS->JOG_PON_02 } )
+					oColumn:picture    := '@!'
 					oColumn:width      := 2
 					oBrwPartidas:addColumn( oColumn )
 					
-					oColumn            := TBColumnNew( PadC( "Coluna 2", 20 ),  {|| PadR( iif( CLUBES->( dbSetOrder(1), dbSeek( JOGOS->JOG_COL_02 ) ),            ;
-																								AllTrim( CLUBES->CLU_ABREVI ) + "/" + ALLTRIM( CLUBES->CLU_UF ), ;
-																								"" ), 20 ) }                                                     )
-					oColumn:picture    := "@!"
+					oColumn            := TBColumnNew( PadC( 'Coluna 2', 20 ),  {|| PadR( iif( CLUBES->( dbSetOrder(1), dbSeek( JOGOS->JOG_COL_02 ) ),            ;
+																								AllTrim( CLUBES->CLU_ABREVI ) + '/' + AllTrim( CLUBES->CLU_UF ), ;
+																								'' ), 20 ) }                                                     )
+					oColumn:picture    := '@!'
 					oColumn:width      := 20
 					oBrwPartidas:addColumn( oColumn )
 
@@ -187,7 +187,7 @@ local nPosDezenas   := 1
 					oTmpButton:sBlock    := { || LTGAcoes() }
 					oTmpButton:Style     := ''
 					oTmpButton:ColorSpec := SysPushButton()
-					AADD( oBrwConcurso:Cargo, { oTmpButton, UPPER( SUBSTR( oTmpButton:Caption, AT('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+					AAdd( oBrwConcurso:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
 
 					oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+42, ' &Sair ' )
 					oTmpButton:sBlock    := { || lSair := pTRUE }
@@ -256,13 +256,13 @@ local nPosDezenas   := 1
 									oBrwConcurso:Cargo[ nMenuItem ][1]:SetFocus()
 
 								case nKey == K_MWFORWARD
-									if MRow() >= oBrwConcurso:nTop .and. MRow() <= oBrwConcurso:nBottom .and. ;
+									If MRow() >= oBrwConcurso:nTop .and. MRow() <= oBrwConcurso:nBottom .and. ;
 										Mcol() >= oBrwConcurso:nTop .and. Mcol() <= oBrwConcurso:nRight
 										oBrwConcurso:up()
 									EndIf
 
 								case nKey == K_MWBACKWARD
-									if MRow() >= oBrwConcurso:nTop .and. MRow() <= oBrwConcurso:nBottom .and. ;
+									If MRow() >= oBrwConcurso:nTop .and. MRow() <= oBrwConcurso:nBottom .and. ;
 										Mcol() >= oBrwConcurso:nTop .and. Mcol() <= oBrwConcurso:nRight
 										oBrwConcurso:down()
 									EndIf	
@@ -273,20 +273,19 @@ local nPosDezenas   := 1
 
                             endcase
                             
-						else
-							nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 )
-							if nTmp > 720
+						Else
+							If ( nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 ) ) > 720
 								nRefresh := 60000 /* um minuto a cada 12 horas */
-							elseif nTmp > 60
+							ElseIf nTmp > 60
 								nRefresh := 30000
-							elseif nTmp > 15
+							ElseIf nTmp > 15
 								nRefresh := 10000
-							elseif nTmp > 1
+							ElseIf nTmp > 1
 								nRefresh := 3000
-							elseif nTmp > 0
+							ElseIf nTmp > 0
 								nRefresh := 2000
-							endif
-						endif
+							EndIf
+						EndIf
 
 					enddo
 
@@ -316,7 +315,7 @@ return
 *   LTGMntBrowse -> LTGIncluir
 *
 */
-STATIC PROCEDURE LTGIncluir
+STATIC PROCEDURE LtgIncluir
 
 local aClubes
 local nPointer
@@ -358,7 +357,7 @@ memvar xCount, xTemp
 					//
 					If ( cAutoSequence := oIniFile:ReadString( 'LOTOGOL', 'AUTO_SEQUENCE', '0' ) ) == '1'
 						// Define o codigo sequencial
-						dbEval( { || nCodigo++ }, { || CONCURSO->CON_JOGO == pLOTOGOL .and. CONCURSO->( .not. Eof() ) } )
+						dbEval( { || nCodigo++ }, { || CONCURSO->CON_JOGO == pLOTOGOL .and. .not. CONCURSO->( Eof() ) } )
 						pLTG_CONCURSO := StrZero( nCodigo, 5 )
 					EndIf
 
@@ -373,29 +372,29 @@ memvar xCount, xTemp
 					pLTG_PARTIDA_04_CLUBE_2 := oIniFile:ReadString( 'LOTOGOL', 'LTG_PARTIDA_04_CLUBE_2', Space(5) )
 					pLTG_PARTIDA_05_CLUBE_1 := oIniFile:ReadString( 'LOTOGOL', 'LTG_PARTIDA_05_CLUBE_1', Space(5) )
 					pLTG_PARTIDA_05_CLUBE_2 := oIniFile:ReadString( 'LOTOGOL', 'LTG_PARTIDA_05_CLUBE_2', Space(5) )
-					
-					
+
+
 					// Cria o Objeto Windows
 					oWindow        := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
-					oWindow:nTop    := INT( SystemMaxRow() / 2 ) - 14
-					oWindow:nLeft   := INT( SystemMaxCol() / 2 ) - 30
-					oWindow:nBottom := INT( SystemMaxRow() / 2 ) + 15
-					oWindow:nRight  := INT( SystemMaxCol() / 2 ) + 30
+					oWindow:nTop    := Int( SystemMaxRow() / 2 ) - 14
+					oWindow:nLeft   := Int( SystemMaxCol() / 2 ) - 30
+					oWindow:nBottom := Int( SystemMaxRow() / 2 ) + 15
+					oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 30
 					oWindow:Open()
-					
-					WHILE lContinua
-						
+
+					while lContinua
+
 						@ oWindow:nTop+ 1, oWindow:nLeft+14 GET     pLTG_CONCURSO                                  ;
 															PICT    '@K 99999'                                     ;
 															SEND    VarPut(StrZero(Val(ATail(GetList):VarGet()),5));
 															CAPTION 'Concurso'                                     ;
 															COLOR   SysFieldGet()
-						
+
 						@ oWindow:nTop+ 1, oWindow:nLeft+40 GET     pLTG_SORTEIO                                   ;
 															PICT    '@KD 99/99/99'                                 ;
 															CAPTION 'Sorteio'                                      ;
 															COLOR   SysFieldGet()
-						
+
 						hb_DispBox( oWindow:nTop+ 2, oWindow:nLeft+ 1, ;
 									oWindow:nTop+ 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
 
@@ -409,19 +408,19 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[2]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+36, "&1" )
+						aGroup[2]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[3]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+42, "&2" )
+						aGroup[3]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[4]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+48, "&3" )
+						aGroup[4]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[5]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+54, "&+" )
+						aGroup[5]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
 						
 						@ oWindow:nTop+ 4, oWindow:nLeft+28, ;
@@ -436,19 +435,19 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[2]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+36, "&1" )
+						aGroup[2]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[3]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+42, "&2" )
+						aGroup[3]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[4]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+48, "&3" )
+						aGroup[4]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[5]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+54, "&+" )
+						aGroup[5]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
 						
 						@ oWindow:nTop+ 4, oWindow:nLeft+28, ;
@@ -469,19 +468,19 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[2]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+36, "&1" )
+						aGroup[2]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[3]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+42, "&2" )
+						aGroup[3]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[4]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+48, "&3" )
+						aGroup[4]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[5]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+54, "&+" )
+						aGroup[5]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
 						
 						@ oWindow:nTop+ 8, oWindow:nLeft+28, ;
@@ -496,19 +495,19 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[2]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+36, "&1" )
+						aGroup[2]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[3]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+42, "&2" )
+						aGroup[3]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[4]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+48, "&3" )
+						aGroup[4]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[5]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+54, "&+" )
+						aGroup[5]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
 						
 						@ oWindow:nTop+ 8, oWindow:nLeft+28, ;
@@ -529,19 +528,19 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[2]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+36, "&1" )
+						aGroup[2]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[3]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+42, "&2" )
+						aGroup[3]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[4]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+48, "&3" )
+						aGroup[4]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[5]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+54, "&+" )
+						aGroup[5]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
 						
 						@ oWindow:nTop+12, oWindow:nLeft+28, ;
@@ -556,19 +555,19 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[2]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+36, "&1" )
+						aGroup[2]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[3]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+42, "&2" )
+						aGroup[3]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[4]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+48, "&3" )
+						aGroup[4]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[5]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+54, "&+" )
+						aGroup[5]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
 						
 						@ oWindow:nTop+12, oWindow:nLeft+28, ;
@@ -589,19 +588,19 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[2]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+36, "&1" )
+						aGroup[2]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[3]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+42, "&2" )
+						aGroup[3]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[4]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+48, "&3" )
+						aGroup[4]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[5]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+54, "&+" )
+						aGroup[5]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
 						
 						@ oWindow:nTop+16, oWindow:nLeft+28, ;
@@ -616,19 +615,19 @@ memvar xCount, xTemp
 																SCROLLBAR                                           ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[2]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+36, "&1" )
+						aGroup[2]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[3]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+42, "&2" )
+						aGroup[3]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[4]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+48, "&3" )
+						aGroup[4]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[5]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+54, "&+" )
+						aGroup[5]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
 						
 						@ oWindow:nTop+16, oWindow:nLeft+28, ;
@@ -649,19 +648,19 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[2]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+36, "&1" )
+						aGroup[2]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[3]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+42, "&2" )
+						aGroup[3]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[4]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+48, "&3" )
+						aGroup[4]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[5]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+54, "&+" )
+						aGroup[5]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
 															
 						@ oWindow:nTop+20, oWindow:nLeft+28, ;
@@ -676,19 +675,19 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[2]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+36, "&1" )
+						aGroup[2]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[3]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+42, "&2" )
+						aGroup[3]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[4]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+48, "&3" )
+						aGroup[4]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
 						
-						aGroup[5]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+54, "&+" )
+						aGroup[5]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
 
 						@ oWindow:nTop+20, oWindow:nLeft+28, ;
@@ -823,7 +822,7 @@ memvar xCount, xTemp
 			EndIf
 
 		Else
-			ErrorTable( '002' )  // "Nao existem clubes cadastrados."
+			ErrorTable( '002' )  // Nao existem clubes cadastrados.
 		EndIf
 
 	EndIf
@@ -840,7 +839,7 @@ return
 *   LTGMntBrowse -> LTGModificar
 *
 */
-STATIC PROCEDURE LTGModificar
+STATIC PROCEDURE LtgModificar
 
 local aClubes
 local nPointer
@@ -860,54 +859,54 @@ memvar xCount, xTemp
 		If Len( aClubes := LoadClubes() ) > 0			
 
 			If ( nPointer := AScan( pSTRU_SYSTEM, { |xJog| xJog[ pSTRU_JOGO ] == pLOTOGOL } ) ) > 0
-			
+
 				begin sequence
-				
+
 					// Salva a Area corrente na Pilha
 					DstkPush()
-					
+
 					// Inicializa o vetor aLotogol
 					xInitLotogol
-					
+
 					// Inicializa as Variaveis de no vetor aLotogol
 					xStoreLotogol
-					
+
 					//
 					// Atualiza a variaveis com o registro selecionado
 					//
 					pLTG_CONCURSO := CONCURSO->CON_CONCUR
 					pLTG_SORTEIO  := CONCURSO->CON_SORTEI
-					
-					
+
+
 					//************************************************************************
 					//*Carrega o Concurso Selecionado                                        *
 					//************************************************************************
 					If JOGOS->( dbSetOrder(1), dbSeek( CONCURSO->CON_JOGO + CONCURSO->CON_CONCUR ) )
-						WHILE JOGOS->JOG_JOGO == CONCURSO->CON_JOGO .and. ;
+						while JOGOS->JOG_JOGO == CONCURSO->CON_JOGO .and. ;
 							JOGOS->JOG_CONCUR == CONCURSO->CON_CONCUR .and. .not. ;
 							JOGOS->( Eof() )
 							do case
-								case JOGOS->JOG_FAIXA == "01"
+								case JOGOS->JOG_FAIXA == '01'
 									pLTG_PARTIDA_01_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTG_PARTIDA_01_RESULTADO_1 := pxLTGRead( JOGOS->JOG_PON_01 )
 									pLTG_PARTIDA_01_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTG_PARTIDA_01_RESULTADO_2 := pxLTGRead( JOGOS->JOG_PON_02 )
-								case JOGOS->JOG_FAIXA == "02"
+								case JOGOS->JOG_FAIXA == '02'
 									pLTG_PARTIDA_02_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTG_PARTIDA_02_RESULTADO_1 := pxLTGRead( JOGOS->JOG_PON_01 )
 									pLTG_PARTIDA_02_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTG_PARTIDA_02_RESULTADO_2 := pxLTGRead( JOGOS->JOG_PON_02 )
-								case JOGOS->JOG_FAIXA == "03"
+								case JOGOS->JOG_FAIXA == '03'
 									pLTG_PARTIDA_03_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTG_PARTIDA_03_RESULTADO_1 := pxLTGRead( JOGOS->JOG_PON_01 )
 									pLTG_PARTIDA_03_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTG_PARTIDA_03_RESULTADO_2 := pxLTGRead( JOGOS->JOG_PON_02 )
-								case JOGOS->JOG_FAIXA == "04"
+								case JOGOS->JOG_FAIXA == '04'
 									pLTG_PARTIDA_04_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTG_PARTIDA_04_RESULTADO_1 := pxLTGRead( JOGOS->JOG_PON_01 )
 									pLTG_PARTIDA_04_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTG_PARTIDA_04_RESULTADO_2 := pxLTGRead( JOGOS->JOG_PON_02 )
-								case JOGOS->JOG_FAIXA == "05"
+								case JOGOS->JOG_FAIXA == '05'
 									pLTG_PARTIDA_05_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTG_PARTIDA_05_RESULTADO_1 := pxLTGRead( JOGOS->JOG_PON_01 )
 									pLTG_PARTIDA_05_CLUBE_2     := JOGOS->JOG_COL_02
@@ -926,13 +925,13 @@ memvar xCount, xTemp
 							RATEIO->RAT_CONCUR == CONCURSO->CON_CONCUR .and. .not. ;
 							RATEIO->( Eof() )
 							do case
-								case RATEIO->RAT_FAIXA == "03"
+								case RATEIO->RAT_FAIXA == '03'
 									pLTG_RATEIO_ACERTO_03 := RATEIO->RAT_ACERTA
 									pLTG_RATEIO_PREMIO_03 := RATEIO->RAT_RATEIO
-								case RATEIO->RAT_FAIXA == "04"
+								case RATEIO->RAT_FAIXA == '04'
 									pLTG_RATEIO_ACERTO_04 := RATEIO->RAT_ACERTA
 									pLTG_RATEIO_PREMIO_04 := RATEIO->RAT_RATEIO
-								case RATEIO->RAT_FAIXA == "05"
+								case RATEIO->RAT_FAIXA == '05'
 									pLTG_RATEIO_ACERTO_05 := RATEIO->RAT_ACERTA
 									pLTG_RATEIO_PREMIO_05 := RATEIO->RAT_RATEIO
 							endcase
@@ -943,21 +942,21 @@ memvar xCount, xTemp
 
 					// Cria o Objeto Windows
 					oWindow         := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
-					oWindow:nTop    := INT( SystemMaxRow() / 2 ) - 14
-					oWindow:nLeft   := INT( SystemMaxCol() / 2 ) - 30
-					oWindow:nBottom := INT( SystemMaxRow() / 2 ) + 15
-					oWindow:nRight  := INT( SystemMaxCol() / 2 ) + 30
+					oWindow:nTop    := Int( SystemMaxRow() / 2 ) - 14
+					oWindow:nLeft   := Int( SystemMaxCol() / 2 ) - 30
+					oWindow:nBottom := Int( SystemMaxRow() / 2 ) + 15
+					oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 30
 					oWindow:Open()
-					
-					
-					WHILE lContinua
-						
+
+
+					while lContinua
+
 						@ oWindow:nTop+ 1, oWindow:nLeft+14 GET     pLTG_CONCURSO                                  ;
 															PICT    '@!'                                           ;
 															CAPTION 'Concurso'                                     ;
 															WHEN    pFALSE                                         ;
 															COLOR   SysFieldGet()
-						
+
 						@ oWindow:nTop+ 1, oWindow:nLeft+40 GET		pLTG_SORTEIO                                   ;
 															VALID	.not. Empty( pLTG_SORTEIO )                    ;
 															PICT	'@KD 99/99/99'                                 ;
@@ -967,8 +966,8 @@ memvar xCount, xTemp
 
 						hb_DispBox( oWindow:nTop+ 2, oWindow:nLeft+ 1, ;
 									oWindow:nTop+ 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
-						
-						
+
+
 						// Primeira Partida
 						@ oWindow:nTop+ 3, oWindow:nLeft+ 6, ;
 							oWindow:nTop+ 3, oWindow:nLeft+26 	GET		pLTG_PARTIDA_01_CLUBE_1                    ;
@@ -977,58 +976,58 @@ memvar xCount, xTemp
 																DROPDOWN                                           ;
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
-						
-						aGroup[1]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+30, "&0" )
+
+						aGroup[1]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[2]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+36, "&1" )
+
+						aGroup[2]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[3]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+42, "&2" )
+
+						aGroup[3]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[4]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+48, "&3" )
+
+						aGroup[4]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[5]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+54, "&+" )
+
+						aGroup[5]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
-						
+
 						@ oWindow:nTop+ 4, oWindow:nLeft+28, ;
 							oWindow:nTop+ 4, oWindow:nRight- 1	GET			pLTG_PARTIDA_01_RESULTADO_1            ;
 																RADIOGROUP	aGroup                                 ;
 																COLOR		SysFieldGRadioBox()
-						
+
 						@ oWindow:nTop+ 5, oWindow:nLeft+ 6, ;
 							oWindow:nTop+ 5, oWindow:nLeft+26	GET		pLTG_PARTIDA_01_CLUBE_2                    ;
 																LISTBOX aClubes                                    ;
 																DROPDOWN                                           ;
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
-						
-						aGroup[1]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+30, "&0" )
+
+						aGroup[1]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[2]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+36, "&1" )
+
+						aGroup[2]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[3]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+42, "&2" )
+
+						aGroup[3]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[4]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+48, "&3" )
+
+						aGroup[4]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[5]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+54, "&+" )
+
+						aGroup[5]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
-						
+
 						@ oWindow:nTop+ 4, oWindow:nLeft+28, ;
 							oWindow:nTop+ 4, oWindow:nRight- 1 	GET        	pLTG_PARTIDA_01_RESULTADO_2             ;
 																RADIOGROUP	aGroup                                  ;
 																COLOR      	SysFieldGRadioBox()
-						
+
 						hb_DispBox( oWindow:nTop+ 6, oWindow:nLeft+ 1, ;
 									oWindow:nTop+ 6, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
-						
-						
+
+
 						// Segunda Partida
 						@ oWindow:nTop+ 7, oWindow:nLeft+ 6, ;
 							oWindow:nTop+ 7, oWindow:nLeft+26 	GET		pLTG_PARTIDA_02_CLUBE_1                     ;
@@ -1038,21 +1037,21 @@ memvar xCount, xTemp
 																SCROLLBAR                                           ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[2]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+36, "&1" )
+
+						aGroup[2]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[3]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+42, "&2" )
+
+						aGroup[3]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[4]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+48, "&3" )
+
+						aGroup[4]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[5]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+54, "&+" )
+
+						aGroup[5]           := RadioButton( oWindow:nTop+ 7, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
-						
+
 						@ oWindow:nTop+ 8, oWindow:nLeft+28, ;
 							oWindow:nTop+ 8, oWindow:nRight- 1	GET			pLTG_PARTIDA_02_RESULTADO_1            ;
 																RADIOGROUP 	aGroup                                 ;
@@ -1065,21 +1064,21 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[2]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+36, "&1" )
+
+						aGroup[2]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[3]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+42, "&2" )
+
+						aGroup[3]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[4]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+48, "&3" )
+
+						aGroup[4]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[5]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+54, "&+" )
+
+						aGroup[5]           := RadioButton( oWindow:nTop+ 9, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
-						
+
 						@ oWindow:nTop+ 8, oWindow:nLeft+28, ;
 							oWindow:nTop+ 8, oWindow:nRight- 1	GET			pLTG_PARTIDA_02_RESULTADO_2            ;
 																RADIOGROUP 	aGroup                                 ;
@@ -1087,8 +1086,8 @@ memvar xCount, xTemp
 
 						hb_DispBox( oWindow:nTop+10, oWindow:nLeft+ 1, ;
 									oWindow:nTop+10, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
-						
-						
+
+
 						// Terceira Partida
 						@ oWindow:nTop+11, oWindow:nLeft+ 6, ;
 							oWindow:nTop+11, oWindow:nLeft+26	GET		pLTG_PARTIDA_03_CLUBE_1                    ;
@@ -1098,21 +1097,21 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[2]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+36, "&1" )
+
+						aGroup[2]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[3]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+42, "&2" )
+
+						aGroup[3]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[4]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+48, "&3" )
+
+						aGroup[4]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[5]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+54, "&+" )
+
+						aGroup[5]           := RadioButton( oWindow:nTop+11, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
-						
+
 						@ oWindow:nTop+12, oWindow:nLeft+28, ;
 							oWindow:nTop+12, oWindow:nRight- 1 	GET			pLTG_PARTIDA_03_RESULTADO_1            ;
 																RADIOGROUP 	aGroup                                 ;
@@ -1125,21 +1124,21 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[2]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+36, "&1" )
+
+						aGroup[2]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[3]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+42, "&2" )
+
+						aGroup[3]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[4]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+48, "&3" )
+
+						aGroup[4]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[5]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+54, "&+" )
+
+						aGroup[5]           := RadioButton( oWindow:nTop+13, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
-						
+
 						@ oWindow:nTop+12, oWindow:nLeft+28, ;
 							oWindow:nTop+12, oWindow:nRight- 1 	GET			pLTG_PARTIDA_03_RESULTADO_2            ;
 																RADIOGROUP 	aGroup                                 ;
@@ -1158,21 +1157,21 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[2]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+36, "&1" )
+
+						aGroup[2]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[3]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+42, "&2" )
+
+						aGroup[3]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[4]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+48, "&3" )
+
+						aGroup[4]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[5]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+54, "&+" )
+
+						aGroup[5]           := RadioButton( oWindow:nTop+15, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
-						
+
 						@ oWindow:nTop+16, oWindow:nLeft+28, ;
 							oWindow:nTop+16, oWindow:nRight- 1 	GET      	pLTG_PARTIDA_04_RESULTADO_1            ;
 																RADIOGROUP 	aGroup                                 ;
@@ -1185,26 +1184,26 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[2]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+36, "&1" )
+
+						aGroup[2]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[3]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+42, "&2" )
+
+						aGroup[3]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[4]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+48, "&3" )
+
+						aGroup[4]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[5]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+54, "&+" )
+
+						aGroup[5]           := RadioButton( oWindow:nTop+17, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
-						
+
 						@ oWindow:nTop+16, oWindow:nLeft+28, ;
 							oWindow:nTop+16, oWindow:nRight- 1 	GET        pLTG_PARTIDA_04_RESULTADO_2             ;
 																RADIOGROUP aGroup                                  ;
 																COLOR      SysFieldGRadioBox()
-											
+
 						hb_DispBox( oWindow:nTop+18, oWindow:nLeft+ 1, ;
 									oWindow:nTop+18, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
 
@@ -1218,21 +1217,21 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[2]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+36, "&1" )
+
+						aGroup[2]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[3]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+42, "&2" )
+
+						aGroup[3]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[4]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+48, "&3" )
+
+						aGroup[4]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[5]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+54, "&+" )
+
+						aGroup[5]           := RadioButton( oWindow:nTop+19, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
-															
+
 						@ oWindow:nTop+20, oWindow:nLeft+28, ;
 							oWindow:nTop+20, oWindow:nRight- 1 	GET        pLTG_PARTIDA_05_RESULTADO_1             ;
 																RADIOGROUP aGroup                                  ;
@@ -1245,21 +1244,21 @@ memvar xCount, xTemp
 																SCROLLBAR                                          ;
 																COLOR   SysFieldListBox()
 
-						aGroup[1]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+30, "&0" )
+						aGroup[1]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+30, '&0' )
 						aGroup[1]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[2]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+36, "&1" )
+
+						aGroup[2]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+36, '&1' )
 						aGroup[2]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[3]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+42, "&2" )
+
+						aGroup[3]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+42, '&2' )
 						aGroup[3]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[4]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+48, "&3" )
+
+						aGroup[4]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+48, '&3' )
 						aGroup[4]:ColorSpec := SysFieldBRadioBox()
-						
-						aGroup[5]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+54, "&+" )
+
+						aGroup[5]           := RadioButton( oWindow:nTop+21, oWindow:nLeft+54, '&+' )
 						aGroup[5]:ColorSpec := SysFieldBRadioBox()
-															
+
 						@ oWindow:nTop+20, oWindow:nLeft+28, ;
 							oWindow:nTop+20, oWindow:nRight- 1 	GET        pLTG_PARTIDA_05_RESULTADO_2             ;
 																RADIOGROUP aGroup                                  ;
@@ -1269,7 +1268,7 @@ memvar xCount, xTemp
 						hb_DispBox( oWindow:nTop+22, oWindow:nLeft+ 1, ;
 									oWindow:nTop+22, oWindow:nRight -1, oWindow:cBorder, SystemFormColor() )
 						hb_DispOutAt( oWindow:nTop+22, oWindow:nLeft+ 2, ' Rateio ', SystemLabelColor() )
-						
+
 						@ oWindow:nTop+23, oWindow:nLeft+12 SAY   'Ganhadores'                                     ;
 															COLOR SystemLabelColor()
 
@@ -1302,7 +1301,7 @@ memvar xCount, xTemp
 															PICT  '@EN 99,999,999,999.99'                          ;
 															COLOR SysFieldGet()                                    ;
 															WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '05', pLTG_SORTEIO )
-															
+
 						@ oWindow:nTop+25, oWindow:nLeft+35 GET   pLTG_RATEIO_PREMIO_04                            ;
 															PICT  '@EN 99,999,999,999.99'                          ;
 															COLOR SysFieldGet()                                    ;
@@ -1312,42 +1311,42 @@ memvar xCount, xTemp
 															PICT  '@EN 99,999,999,999.99'                          ;
 															COLOR SysFieldGet()                                    ;
 															WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '03', pLTG_SORTEIO )
-												
+
 						hb_DispBox( oWindow:nBottom- 2, oWindow:nLeft+ 1, ;
 									oWindow:nBottom- 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
-						
+
 						@ oWindow:nBottom- 1, oWindow:nRight-22 GET     lPushButton PUSHBUTTON                     ;
 																CAPTION ' Con&firma '                              ;
 																COLOR   SysPushButton()                            ;
 																STYLE   ''                                         ;
 																STATE   { || lContinua := pTRUE, GetActive():ExitState := GE_WRITE }
-						
+
 						@ oWindow:nBottom- 1, oWindow:nRight-11 GET     lPushButton PUSHBUTTON                     ;
 																CAPTION ' Cance&lar '                              ;
 																COLOR   SysPushButton()                            ;
 																STYLE   ''                                         ;
 																STATE   { || lContinua := pFALSE, GetActive():ExitState := GE_ESCAPE }
-						
+
 						Set( _SET_CURSOR, SC_NORMAL )
-						
+
 						READ
-						
+
 						Set( _SET_CURSOR, SC_NONE )
-						
+
 						If lContinua .and. LastKey() != K_ESC
-							
+
 							If LTGGravaDados()
 								lContinua := pFALSE
 							EndIf
-							
+
 						EndIf
-						
+
 					enddo
-					
+
 				always
 					// Fecha o Objeto Windows
 					oWindow:Close()
-					
+
 					// Restaura a tabela da Pilha
 					DstkPop()
 				end sequence
@@ -1355,9 +1354,9 @@ memvar xCount, xTemp
 			EndIf
 
 		Else
-			ErrorTable( '002' )  // "Nao existem clubes cadastrados."
+			ErrorTable( '002' )  // Nao existem clubes cadastrados.
 		EndIf
-		
+
 	EndIf
 
 return
@@ -1427,7 +1426,6 @@ STATIC PROCEDURE LTGExcluir
 return
 
 
-
 /***
 *
 *	LTGGravaDados()
@@ -1453,10 +1451,10 @@ local lRetValue := pFALSE
 
 
 			// Gravacao dos dados das Partidas
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + "01" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + '01' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTOGOL
 				JOGOS->JOG_CONCUR := pLTG_CONCURSO
-				JOGOS->JOG_FAIXA  := "01"
+				JOGOS->JOG_FAIXA  := '01'
 				JOGOS->JOG_COL_01 := pLTG_PARTIDA_01_CLUBE_1
 				JOGOS->JOG_PON_01 := pxLTGWrite( pLTG_PARTIDA_01_RESULTADO_1 )
 				JOGOS->JOG_COL_02 := pLTG_PARTIDA_01_CLUBE_2
@@ -1464,10 +1462,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 			
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + "02" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + '02' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTOGOL
 				JOGOS->JOG_CONCUR := pLTG_CONCURSO
-				JOGOS->JOG_FAIXA  := "02"
+				JOGOS->JOG_FAIXA  := '02'
 				JOGOS->JOG_COL_01 := pLTG_PARTIDA_02_CLUBE_1
 				JOGOS->JOG_PON_01 := pxLTGWrite( pLTG_PARTIDA_02_RESULTADO_1 )
 				JOGOS->JOG_COL_02 := pLTG_PARTIDA_02_CLUBE_2
@@ -1475,10 +1473,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 			
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + "03" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + '03' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTOGOL
 				JOGOS->JOG_CONCUR := pLTG_CONCURSO
-				JOGOS->JOG_FAIXA  := "03"
+				JOGOS->JOG_FAIXA  := '03'
 				JOGOS->JOG_COL_01 := pLTG_PARTIDA_03_CLUBE_1
 				JOGOS->JOG_PON_01 := pxLTGWrite( pLTG_PARTIDA_03_RESULTADO_1 )
 				JOGOS->JOG_COL_02 := pLTG_PARTIDA_03_CLUBE_2
@@ -1486,10 +1484,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 			
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + "04" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + '04' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTOGOL
 				JOGOS->JOG_CONCUR := pLTG_CONCURSO
-				JOGOS->JOG_FAIXA  := "04"
+				JOGOS->JOG_FAIXA  := '04'
 				JOGOS->JOG_COL_01 := pLTG_PARTIDA_04_CLUBE_1
 				JOGOS->JOG_PON_01 := pxLTGWrite( pLTG_PARTIDA_04_RESULTADO_1 )
 				JOGOS->JOG_COL_02 := pLTG_PARTIDA_04_CLUBE_2
@@ -1497,10 +1495,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 			
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + "05" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + '05' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTOGOL
 				JOGOS->JOG_CONCUR := pLTG_CONCURSO
-				JOGOS->JOG_FAIXA  := "05"
+				JOGOS->JOG_FAIXA  := '05'
 				JOGOS->JOG_COL_01 := pLTG_PARTIDA_05_CLUBE_1
 				JOGOS->JOG_PON_01 := pxLTGWrite( pLTG_PARTIDA_05_RESULTADO_1 )
 				JOGOS->JOG_COL_02 := pLTG_PARTIDA_05_CLUBE_2
@@ -1510,31 +1508,31 @@ local lRetValue := pFALSE
 			
 
 			// Gravacao dos dados da Premiacao
-			If iif( RATEIO->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + "03" ) ), RATEIO->( NetRLock() ), RATEIO->( NetAppend() ) )
+			If iif( RATEIO->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + '03' ) ), RATEIO->( NetRLock() ), RATEIO->( NetAppend() ) )
 				RATEIO->RAT_JOGO    := pLOTOGOL
 				RATEIO->RAT_CONCUR  := pLTG_CONCURSO
-				RATEIO->RAT_FAIXA   := "03"
+				RATEIO->RAT_FAIXA   := '03'
 				RATEIO->RAT_ACERTA  := pLTG_RATEIO_ACERTO_03
 				RATEIO->RAT_RATEIO  := pLTG_RATEIO_PREMIO_03
-				RATEIO->( DBUnLock() )
+				RATEIO->( dbUnlock() )
 			EndIf
 			
-			If iif( RATEIO->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + "04" ) ), RATEIO->( NetRLock() ), RATEIO->( NetAppend() ) )
+			If iif( RATEIO->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + '04' ) ), RATEIO->( NetRLock() ), RATEIO->( NetAppend() ) )
 				RATEIO->RAT_JOGO    := pLOTOGOL
 				RATEIO->RAT_CONCUR  := pLTG_CONCURSO
-				RATEIO->RAT_FAIXA   := "04"
+				RATEIO->RAT_FAIXA   := '04'
 				RATEIO->RAT_ACERTA  := pLTG_RATEIO_ACERTO_04
 				RATEIO->RAT_RATEIO  := pLTG_RATEIO_PREMIO_04
-				RATEIO->( DBUnLock() )
+				RATEIO->( dbUnlock() )
 			EndIf
 			
-			If iif( RATEIO->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + "05" ) ), RATEIO->( NetRLock() ), RATEIO->( NetAppend() ) )
+			If iif( RATEIO->( dbSetOrder(1), dbSeek( pLOTOGOL + pLTG_CONCURSO + '05' ) ), RATEIO->( NetRLock() ), RATEIO->( NetAppend() ) )
 				RATEIO->RAT_JOGO    := pLOTOGOL
 				RATEIO->RAT_CONCUR  := pLTG_CONCURSO
-				RATEIO->RAT_FAIXA   := "05"
+				RATEIO->RAT_FAIXA   := '05'
 				RATEIO->RAT_ACERTA  := pLTG_RATEIO_ACERTO_05
 				RATEIO->RAT_RATEIO  := pLTG_RATEIO_PREMIO_05
-				RATEIO->( DBUnLock() )
+				RATEIO->( dbUnlock() )
 			EndIf
 
 			lRetValue := pTRUE
@@ -1904,7 +1902,7 @@ local nMenuItem   := 1
 local nMaxItens   := 0
 local lSair       := pFALSE
 local oWindow
-local bFiltro     := { || TMP->( .not. Eof() ) }
+local bFiltro     := { || .not. TMP->( Eof() ) }
 
 local oSequen1
 local oSequen2
@@ -1984,7 +1982,7 @@ local nGrade
 				oSequen1               	:= 	TBrowseNew( ( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) + 1 ), oWindow:nLeft+ 1, ;
 														( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) - 3 ), oWindow:nRight- 1 )
 				oSequen1:skipBlock     	:= 	{ |x,k| ;
-												k := iif( Abs(x) >= IIF( x >= 0,                          ;
+												k := iif( Abs(x) >= iif( x >= 0,                          ;
 																	Len( aDezenas ) - nRow, nRow - 1),    ;
 														iif(x >= 0, Len( aDezenas ) - nRow,1 - nRow), x ) ;
 														, nRow += k, k                                    ;
@@ -2196,13 +2194,13 @@ local nGrade
 								oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
 
 							case nKey == K_MWFORWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 									oBrowse:up()
 								EndIf
 
 							case nKey == K_MWBACKWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 									oBrowse:down()
 								EndIf	
@@ -2251,7 +2249,7 @@ local cInicio
 local cFinal
 local nCurrent
 local nTotConcurso := 0
-local bFiltro      := { || CONCURSO->CON_JOGO == pLOTOGOL .and. CONCURSO->( .not. Eof() ) }
+local bFiltro      := { || CONCURSO->CON_JOGO == pLOTOGOL .and. .not. CONCURSO->( Eof() ) }
 local oBarProgress
 local oPDFReport
 local nLinha
@@ -2264,7 +2262,7 @@ local nLinha
 
 		// Totaliza a quantidade de registro cadastrados
 		CONCURSO->( dbEval( { || nTotConcurso++ }, bFiltro ) )
-		if nTotConcurso >= 1
+		If nTotConcurso >= 1
 
 			cInicio	:= StrZero( 1, 5 )
 			cFinal  := StrZero( nTotConcurso, 5 )
@@ -2278,7 +2276,7 @@ local nLinha
 			oWindow:cHeader := ' Impressao Resultados '
 			oWindow:Open()
 
-			WHILE lContinua
+			while lContinua
 
 				@ oWindow:nBottom- 3, oWindow:nLeft+ 10 GET     cInicio                                        ;
 														PICT    '@K! 99999'                                    ;
@@ -2315,13 +2313,13 @@ local nLinha
 
 				Set( _SET_CURSOR, SC_NONE )
 
-				IF lContinua .and. LastKey() != K_ESC
+				If lContinua .and. LastKey() != K_ESC
 
 					dbSelectArea('CONCURSO')
-					IF CONCURSO->( dbSetOrder(1), dbSeek( pLOTOGOL + cInicio ) ) .and. ;
+					If CONCURSO->( dbSetOrder(1), dbSeek( pLOTOGOL + cInicio ) ) .and. ;
 						CONCURSO->( dbSetOrder(1), dbSeek( pLOTOGOL + cFinal ) )
 
-						bFiltro := { || CONCURSO->CON_JOGO == pLOTOGOL .and. CONCURSO->( .not. Eof() ) .and. ;
+						bFiltro := { || CONCURSO->CON_JOGO == pLOTOGOL .and. .not. CONCURSO->( Eof() ) .and. ;
 										CONCURSO->CON_CONCUR >= cInicio .and. CONCURSO->CON_CONCUR  <= cFinal }
 
 						// Totaliza a quantidade de registro cadastrados
@@ -2397,7 +2395,7 @@ local nLinha
 
 								enddo
 
-							endif
+							EndIf
 
 						always
 							oPDFReport:end()
@@ -2416,13 +2414,13 @@ local nLinha
 
 					EndIf
 
-				endif
+				EndIf
 
 			enddo
 
-		else
+		Else
 			ErrorTable( '207' )  // Nao existem informacoes a serem impressas.
-		endif
+		EndIf
 
 	always
 		// Fecha o Objeto Windows
