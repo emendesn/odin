@@ -9,7 +9,7 @@
 *
 ***/
 
-#require "xhb"
+#require 'xhb'
 
 #include 'set.ch'
 #include 'box.ch'
@@ -47,7 +47,7 @@ local nLastKeyType  := hb_MilliSeconds()
 local nRefresh      := 1000              /* um segundo como defaul */
 local nCount        := 0
 local nMenuItem     := 1
-local nMaxItens     := 1
+local nMaxItens     := 0
 local lSair         := pFALSE
 local oWindow
 local bFiltro
@@ -80,7 +80,7 @@ local nGrade
 						If nPosDezenas <= Len( pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ] )
 							aDezenas[ nLinDezenas ][ nColDezenas ] := pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ][ nPosDezenas ]
 						Else
-							aDezenas[ nLinDezenas ][ nColDezenas ] := '  '
+							aDezenas[ nLinDezenas ][ nColDezenas ] := Space(2)
 						EndIf
 						nPosDezenas++
 					next
@@ -100,7 +100,7 @@ local nGrade
 							oWindow:nBottom- 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
 
 				// Estabelece o Filtro para exibicao dos registros
-				bFiltro := { || CONCURSO->CON_JOGO == pLOTO_FACIL .and. CONCURSO->( .not. Eof() ) }
+				bFiltro := { || CONCURSO->CON_JOGO == pLOTO_FACIL .and. .not. CONCURSO->( Eof() ) }
 
 				dbSelectArea('CONCURSO')
 				CONCURSO->( dbEval( {|| nMaxItens++ }, bFiltro ) )
@@ -227,7 +227,7 @@ local nGrade
 					oTmpButton:sBlock    := { || LTFAcoes() }
 					oTmpButton:Style     := ''
 					oTmpButton:ColorSpec := SysPushButton()
-					AADD( oBrowse:Cargo, { oTmpButton, UPPER( SUBSTR( oTmpButton:Caption, AT('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+					AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
 
 					oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+42, ' &Sair ' )
 					oTmpButton:sBlock    := { || lSair := pTRUE }
@@ -296,13 +296,13 @@ local nGrade
 									oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
 
 								case nKey == K_MWFORWARD
-									if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+									If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 										Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 										oBrowse:up()
 									EndIf
 
 								case nKey == K_MWBACKWARD
-									if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+									If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 										Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 										oBrowse:down()
 									EndIf	
@@ -313,20 +313,19 @@ local nGrade
 
                             endcase
 
-						else
-							nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 )
-							if nTmp > 720
+						Else
+							If ( nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 ) ) > 720
 								nRefresh := 60000 /* um minuto a cada 12 horas */
-							elseif nTmp > 60
+							ElseIf nTmp > 60
 								nRefresh := 30000
-							elseif nTmp > 15
+							ElseIf nTmp > 15
 								nRefresh := 10000
-							elseif nTmp > 1
+							ElseIf nTmp > 1
 								nRefresh := 3000
-							elseif nTmp > 0
+							ElseIf nTmp > 0
 								nRefresh := 2000
-							endif
-						endif
+							EndIf
+						EndIf
 
 					enddo
 
@@ -394,17 +393,17 @@ memvar xCount, xTemp
 				//
 				If ( cAutoSequence := oIniFile:ReadString( 'LOTOFACIL', 'AUTO_SEQUENCE', '0' ) ) == '1'
 					// Define o codigo sequencial
-					dbEval( { || nCodigo++ }, { || CONCURSO->CON_JOGO == pLOTO_FACIL .and. CONCURSO->( .not. Eof() ) } )
+					dbEval( { || nCodigo++ }, { || CONCURSO->CON_JOGO == pLOTO_FACIL .and. .not. CONCURSO->( Eof() ) } )
 					pLTF_CONCURSO := StrZero( nCodigo, 5 )
 				EndIf
 
 
 				// Cria o Objeto Windows
 				oWindow        := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
-				oWindow:nTop    := INT( SystemMaxRow() / 2 ) -  8
-				oWindow:nLeft   := INT( SystemMaxCol() / 2 ) - 21
-				oWindow:nBottom := INT( SystemMaxRow() / 2 ) +  9
-				oWindow:nRight  := INT( SystemMaxCol() / 2 ) + 21
+				oWindow:nTop    := Int( SystemMaxRow() / 2 ) -  8
+				oWindow:nLeft   := Int( SystemMaxCol() / 2 ) - 21
+				oWindow:nBottom := Int( SystemMaxRow() / 2 ) +  9
+				oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 21
 				oWindow:Open()
 
 				while lContinua
@@ -758,10 +757,10 @@ memvar xCount, xTemp
 
 				// Cria o Objeto Windows
 				oWindow         := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
-				oWindow:nTop    := INT( SystemMaxRow() / 2 ) -  8
-				oWindow:nLeft   := INT( SystemMaxCol() / 2 ) - 21
-				oWindow:nBottom := INT( SystemMaxRow() / 2 ) +  9
-				oWindow:nRight  := INT( SystemMaxCol() / 2 ) + 21
+				oWindow:nTop    := Int( SystemMaxRow() / 2 ) -  8
+				oWindow:nLeft   := Int( SystemMaxCol() / 2 ) - 21
+				oWindow:nBottom := Int( SystemMaxRow() / 2 ) +  9
+				oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 21
 				oWindow:Open()
 
 
@@ -1260,14 +1259,14 @@ local lContinua    := pTRUE
 local lPushButton
 local oWindow
 
-local cArquivo     := PadR( hb_DirBase() + pLOTO_FACIL + DToS( Date() ) + ".xml", 50, '' )
+local cArquivo     := PadR( hb_DirBase() + pLOTO_FACIL + DToS( Date() ) + '.xml', 50, '' )
 local nCurrent
 local nTotConcurso := 0
-local bFiltro      := { || CONCURSO->CON_JOGO == pLOTO_FACIL .and. CONCURSO->( .not. Eof() ) }
+local bFiltro      := { || CONCURSO->CON_JOGO == pLOTO_FACIL .and. .not. CONCURSO->( Eof() ) }
 local oBarProgress
 
 local oXMLDoc
-LOCAL hNode := { => }
+local hNode := { => }
 
 
 	begin sequence
@@ -1277,7 +1276,7 @@ LOCAL hNode := { => }
 
 		// Totaliza a quantidade de registro cadastrados
 		CONCURSO->( dbEval( { || nTotConcurso++ }, bFiltro ) )
-		if nTotConcurso >= 1
+		If nTotConcurso >= 1
 
 			// Cria o Objeto Windows
 			oWindow        	:= WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
@@ -1316,28 +1315,28 @@ LOCAL hNode := { => }
 
 				Set( _SET_CURSOR, SC_NONE )
 
-				IF lContinua .and. LastKey() != K_ESC
+				If lContinua .and. LastKey() != K_ESC
 
-					If .not. file( cArquivo )
+					If .not. File( cArquivo )
 
 						altd()
 
 /*						oXmlDoc := TXmlDocument():New() // Creacion del documento respuesta....
-//						oXmlDoc:oRoot:AddBelow( TxmlNode():New( HBXML_TYPE_PI,'xml' , , 'version="1.0" encoding=' ) )
-						oXmlDoc:oRoot:AddBelow( TxmlNode():New( ,'xml' , , 'version="1.0" encoding=' ) ) */
+//						oXmlDoc:oRoot:AddBelow( TxmlNode():New( HBXML_TYPE_PI,'xml' , , 'version='1.0' encoding=' ) )
+						oXmlDoc:oRoot:AddBelow( TxmlNode():New( ,'xml' , , 'version='1.0' encoding=' ) ) */
 
-						oXmlDoc := mxmlNewXML("1.0")
-						hNode[ 1 ] := mxmlNewElement( oXmlDoc, "TGroup" )
-						mxmlElementSetAttr( hNode[ 1 ], "version", "1.00" )
-						mxmlElementSetAttr( hNode[ 1 ], "xmlns", "http://www.any.url.com" )
-						hNode[ 2 ] := mxmlNewElement( hNode[ 1 ], "bill" )
+						oXmlDoc := mxmlNewXML('1.0')
+						hNode[ 1 ] := mxmlNewElement( oXmlDoc, 'TGroup' )
+						mxmlElementSetAttr( hNode[ 1 ], 'version', '1.00' )
+						mxmlElementSetAttr( hNode[ 1 ], 'xmlns', 'http://www.any.url.com' )
+						hNode[ 2 ] := mxmlNewElement( hNode[ 1 ], 'bill' )
 						hNode[ 3 ] := mxmlNewElement( hNode[ 2 ], 'TData' )
-						hNode[ 4 ] := mxmlNewElement( hNode[ 3 ], "code" )
-						mxmlNewText( hNode[ 4 ], 0, "01" )
-						hNode[ 4 ] := mxmlNewElement( hNode[ 3 ], "data" )
-						mxmlNewText( hNode[ 4 ], 0, "Sample" )
+						hNode[ 4 ] := mxmlNewElement( hNode[ 3 ], 'code' )
+						mxmlNewText( hNode[ 4 ], 0, '01' )
+						hNode[ 4 ] := mxmlNewElement( hNode[ 3 ], 'data' )
+						mxmlNewText( hNode[ 4 ], 0, 'Sample' )
 						hNode[ 3 ] := mxmlNewElement( hNode[ 2 ], 'TDate' )
-						hNode[ 4 ] := mxmlNewElement( hNode[ 3 ], "date" )
+						hNode[ 4 ] := mxmlNewElement( hNode[ 3 ], 'date' )
 						mxmlNewText( hNode[ 4 ], 0, STOD( Date( ) ) )
 						mxmlSaveFile( oXmlDoc, LOWER( cArquivo ) ) // , @whitespace_cb() )
 
@@ -1653,13 +1652,13 @@ local nLastKeyType  := hb_MilliSeconds()
 local nRefresh      := 1000              /* um segundo como defaul */
 local nCount        := 0
 local nMenuItem     := 1
-local nMaxItens     := 1
+local nMaxItens     := 0
 local lSair         := pFALSE
 
 
 
 
-local cDisplayFile := ""
+local cDisplayFile := ''
 local nRow         := 1
 	
 local aTemp
@@ -1686,8 +1685,8 @@ local nPercComb
 			oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 21
 			oWindow:Open()
 
-			hb_DispBox( oWindow:Bottom- 2, oWindow:Left+ 1, ;
-						oWindow:Bottom- 2, oWindow:Right- 1, B_SINGLE, SystemFormColor() )
+			hb_DispBox( oWindow:nBottom- 2, oWindow:nLeft+ 1, ;
+						oWindow:nBottom- 2, oWindow:nRight- 1, oWindow:cBorder )
 
 
 			// nPercComb := hb_idleAdd( {||  hb_DispOutAt( oWindow:nTop+ 2, oWindow:nLeft+ 1,    ;
@@ -1699,16 +1698,29 @@ local nPercComb
 			// oCombine:nQuantSequencia := nQuantDezenas
 			// oCombine:Execute()
 
-			/* altd()
-			oCombine           := TLFCombine():New( Nil, aTemp, 3, 2 )
+			altd()
+
+			aTemp := {  '01', '02', '03', '04', '05', '06', '07', '08', '09', '10',                  ;
+						'11', '12', '13', '14', '15', '16', '17' }
+
+			oCombine           		 := hbCombina():New()
+			oCombine:aSequencia 	 := aTemp
+			oCombine:nQuantSequencia := nQuantDezenas
+			oCombine:Execute()
+
+
+/*			oCombine           := TLFCombine():New( Nil, aTemp, 3, 2 )
 			oCombine:cFileName := GetNextFile( SystemTmp() )
-			oCombine:Execute() */
+			oCombine:Execute()
+*/
+
+			altd()
 
 			begin sequence
 
 				// Exibe a Grade com as Dezenas
-				oBrowse            		:= 	TBrowseNew(	oWindow:Top+ 1, oWindow:Left+ 1, ;
-														oWindow:Bottom- 3, oWindow:Right- 1 )
+				oBrowse            		:= 	TBrowseNew(	oWindow:nTop+ 1, oWindow:nLeft+ 1, ;
+														oWindow:nBottom- 3, oWindow:nRight- 1 )
 				oBrowse:skipBlock		:= 	{	|x,k| ;
 													k := iif( 	Abs(x) >= iif( x >= 0,                                  ;
 																		Len( oBrowse:Cargo ) - nRow, nRow - 1),         ;
@@ -1723,20 +1735,20 @@ local nPercComb
 												{ 'TESTE2.TST' }, ;
 												{ 'TESTE3.TST' }  }
 
-				oColumn            := TBColumnNew( "", { || oBrowse:Cargo[ nRow ][1] } )
+				oColumn            := TBColumnNew( '', { || oBrowse:Cargo[ nRow ][1] } )
 				oColumn:width      := 10
 				oBrowse:addColumn( oColumn )
 	
-				oTmpButton           := PushButton( oWindow:Bottom- 1, oWindow:Right-11, "    &Ok    " )
+				oTmpButton           := PushButton( oWindow:Bottom- 1, oWindow:Right-11, '    &Ok    ' )
 				oTmpButton:sBlock    := { || lSair := pTRUE }
-				oTmpButton:Style     := ""
+				oTmpButton:Style     := ''
 				oTmpButton:ColorSpec := SysPushButton()
-				AADD( oBrowse:Cargo, { oTmpButton, UPPER( SUBSTR( oTmpButton:caption, AT("&", oTmpButton:caption )+ 1, 1 ) ) } )
+				AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:caption, At('&', oTmpButton:caption )+ 1, 1 ) ) } )
 
 				AEval( oBrowse:Cargo, { |xItem| xItem[1]:Display() } )
 				oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
 
-				WHILE .NOT. lSair
+				while .not. lSair
 
 					oBrowse:forceStable()
 						
@@ -1777,13 +1789,13 @@ local nPercComb
 								oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
 
 							case nKey == K_MWFORWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 									oBrowse:up()
 								EndIf
 
 							case nKey == K_MWBACKWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 									oBrowse:down()
 								EndIf	
@@ -1794,20 +1806,19 @@ local nPercComb
 
 						endcase
 
-					else
-						nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 )
-						if nTmp > 720
+					Else
+						If ( nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 ) ) > 720
 							nRefresh := 60000 /* um minuto a cada 12 horas */
-						elseif nTmp > 60
+						ElseIf nTmp > 60
 							nRefresh := 30000
-						elseif nTmp > 15
+						ElseIf nTmp > 15
 							nRefresh := 10000
-						elseif nTmp > 1
+						ElseIf nTmp > 1
 							nRefresh := 3000
-						elseif nTmp > 0
+						ElseIf nTmp > 0
 							nRefresh := 2000
-						endif
-					endif
+						EndIf
+					EndIf
 
 				enddo
 
@@ -1850,7 +1861,7 @@ local nMenuItem   := 1
 local nMaxItens   := 0
 local lSair       := pFALSE
 local oWindow
-local bFiltro     := { || TMP->( .not. Eof() ) }
+local bFiltro     := { || .not. TMP->( Eof() ) }
 
 local oSequen1
 local oSequen2
@@ -1930,7 +1941,7 @@ local nGrade
 				oSequen1               	:= 	TBrowseNew( ( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) + 1 ), oWindow:nLeft+ 1, ;
 														( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) - 3 ), oWindow:nRight- 1 )
 				oSequen1:skipBlock     	:= 	{ |x,k| ;
-												k := iif( Abs(x) >= IIF( x >= 0,                          ;
+												k := iif( Abs(x) >= iif( x >= 0,                          ;
 																	Len( aDezenas ) - nRow, nRow - 1),    ;
 														iif(x >= 0, Len( aDezenas ) - nRow,1 - nRow), x ) ;
 														, nRow += k, k                                    ;
@@ -2142,13 +2153,13 @@ local nGrade
 								oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
 
 							case nKey == K_MWFORWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 									oBrowse:up()
 								EndIf
 
 							case nKey == K_MWBACKWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 									oBrowse:down()
 								EndIf	
@@ -2197,7 +2208,7 @@ local cInicio
 local cFinal
 local nCurrent
 local nTotConcurso := 0
-local bFiltro      := { || CONCURSO->CON_JOGO == pLOTO_FACIL .and. CONCURSO->( .not. Eof() ) }
+local bFiltro      := { || CONCURSO->CON_JOGO == pLOTO_FACIL .and. .not. CONCURSO->( Eof() ) }
 local oBarProgress
 local oPDFReport
 local nLinha
@@ -2210,7 +2221,7 @@ local nLinha
 
 		// Totaliza a quantidade de registro cadastrados
 		CONCURSO->( dbEval( { || nTotConcurso++ }, bFiltro ) )
-		if nTotConcurso >= 1
+		If nTotConcurso >= 1
 
 			cInicio	:= StrZero( 1, 5 )
 			cFinal  := StrZero( nTotConcurso, 5 )
@@ -2224,7 +2235,7 @@ local nLinha
 			oWindow:cHeader := ' Impressao Resultados '
 			oWindow:Open()
 
-			WHILE lContinua
+			while lContinua
 
 				@ oWindow:nBottom- 3, oWindow:nLeft+ 10 GET     cInicio                                        ;
 														PICT    '@K! 99999'                                    ;
@@ -2261,13 +2272,13 @@ local nLinha
 
 				Set( _SET_CURSOR, SC_NONE )
 
-				IF lContinua .and. LastKey() != K_ESC
+				If lContinua .and. LastKey() != K_ESC
 
 					dbSelectArea('CONCURSO')
-					IF CONCURSO->( dbSetOrder(1), dbSeek( pLOTO_FACIL + cInicio ) ) .and. ;
+					If CONCURSO->( dbSetOrder(1), dbSeek( pLOTO_FACIL + cInicio ) ) .and. ;
 						CONCURSO->( dbSetOrder(1), dbSeek( pLOTO_FACIL + cFinal ) )
 
-						bFiltro := { || CONCURSO->CON_JOGO == pLOTO_FACIL .and. CONCURSO->( .not. Eof() ) .and. ;
+						bFiltro := { || CONCURSO->CON_JOGO == pLOTO_FACIL .and. .not. CONCURSO->( Eof() ) .and. ;
 										CONCURSO->CON_CONCUR >= cInicio .and. CONCURSO->CON_CONCUR  <= cFinal }
 
 						// Totaliza a quantidade de registro cadastrados
@@ -2343,7 +2354,7 @@ local nLinha
 
 								enddo
 
-							endif
+							EndIf
 
 						always
 							oPDFReport:end()
@@ -2362,13 +2373,13 @@ local nLinha
 
 					EndIf
 
-				endif
+				EndIf
 
 			enddo
 
-		else
+		Else
 			ErrorTable( '207' )  // Nao existem informacoes a serem impressas.
-		endif
+		EndIf
 
 	always
 		// Fecha o Objeto Windows
@@ -2382,29 +2393,29 @@ return
 
 STATIC FUNCTION ArraySplit( arrayIn, nChunksReq )
 
-	LOCAL arrayOut
-	LOCAL nChunkSize
-	LOCAL nChunkPos
-	LOCAL item
+	local arrayOut
+	local nChunkSize
+	local nChunkPos
+	local item
  
-	IF nChunksReq > 0
+	If nChunksReq > 0
  
 	   arrayOut := {}
 	   nChunkSize := Max( Round( Len( arrayIn ) / nChunksReq, 0 ), 1 )
 	   nChunkPos := 0
  
-	   FOR EACH item IN arrayIn
-		  IF nChunkPos == 0
-			 AAdd( arrayOut, {} )
-		  ENDIF
-		  AAdd( ATail( arrayOut ), item )
-		  IF ++nChunkPos == nChunkSize .AND. Len( arrayOut ) < nChunksReq
-			 nChunkPos := 0
-		  ENDIF
-	   NEXT
-	ELSE
+	   for each item in arrayIn
+		  	If nChunkPos == 0
+			 	AAdd( arrayOut, {} )
+			EndIf
+			AAdd( ATail( arrayOut ), item )
+			If ++nChunkPos == nChunkSize .and. Len( arrayOut ) < nChunksReq
+				 nChunkPos := 0
+			EndIf
+		next
+	Else
 	   arrayOut := { arrayIn }
-	ENDIF
+	EndIf
  
-	RETURN arrayOut
+return arrayOut
  
