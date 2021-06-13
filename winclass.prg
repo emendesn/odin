@@ -8,10 +8,10 @@
 *	Classes para Manipulacao de Janelas.
 *
 */
-#include "hbclass.ch"
-#include "common.ch"
-#include "set.ch"
-#include "box.ch"
+#include 'hbclass.ch'
+#include 'common.ch'
+#include 'set.ch'
+#include 'box.ch'
 
 /***
 *
@@ -78,7 +78,7 @@ METHOD New( nTop, nLeft, nBottom, nRight, cBorder, cColor, cHeader ) CLASS Windo
 	::nRight  := iif( .not. HB_ISNIL( nRight ), nRight, MaxCol() )
 	::cBorder := iif( .not. HB_ISNIL( cBorder ), cBorder, B_SINGLE )	
 	::cColor  := iif( .not. HB_ISNIL( cColor ), cColor, Set( _SET_COLOR ) )
-	::cHeader := iif( .not. HB_ISNIL( cHeader ), cHeader, "" )
+	::cHeader := iif( .not. HB_ISNIL( cHeader ), cHeader, '' )
 		
 return QSelf()
 
