@@ -28,7 +28,7 @@
 				"preLaunchTask": "odinDebug",
 				"postDebugTask": "",
 				"sourcePaths": [
-                "${workspaceFolder}"
+					"${workspaceFolder}"
 				]
 			}
 		],
@@ -63,7 +63,7 @@
 			{
 				"label": "odinRelease",
 				"type": "shell",
-				"command": "~/hb/bin//hbmk2",
+				"command": "~/hb/bin/hbmk2",
 				"args": [
 					"~/odin/odin.hbp",
 					"-rebuild"
