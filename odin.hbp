@@ -6,6 +6,7 @@
 -w2
 -q0
 -es0
+-fullstatic
 
 -lhbtip
 -lhbmzip
@@ -51,6 +52,10 @@ tmania.prg
 loteca.prg
 lotogol.prg
 dsorte.prg
+clubes.prg
+competic.prg
+apostado.prg
+aposta.prg
 dbfunc.prg
 strfunc.prg
 odnfunc.prg
@@ -59,4 +64,5 @@ pdfclass.prg
 barclass.prg
 iniclass.prg
 winclass.prg
+TNeural.prg
 debug.prg
