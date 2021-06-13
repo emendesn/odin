@@ -35,7 +35,7 @@ memvar GetList
 */
 PROCEDURE LTCMntBrowse()
 
-local oBrwConcurso
+local oBrwLoteca
 local oBrwPartidas
 local oColumn
 local oTmpButton, oScrollBar
@@ -45,26 +45,20 @@ local nLastKeyType  := hb_MilliSeconds()
 local nRefresh      := 1000              /* um segundo como defaul */
 local nCount        := 0
 local nMenuItem     := 1
-local nMaxItens     := 1
+local nMaxItens     := 0
 local lSair         := pFALSE
 local oWindow
-local bFiltro
 
-local bFilConcurso  := { || CONCURSO->CON_JOGO == pLOTECA .and. .not. ;
-							CONCURSO->( Eof() ) }
+local bFilConcurso  := { || CONCURSO->CON_JOGO == pLOTECA .and. ;
+							.not. CONCURSO->( Eof() ) }
 local bFilPartidas  := { ||	JOGOS->JOG_JOGO == CONCURSO->CON_JOGO .and. ;
-							JOGOS->JOG_CONCUR == CONCURSO->CON_CONCUR .and. .not.  ;
-							JOGOS->( Eof() ) }
+							JOGOS->JOG_CONCUR == CONCURSO->CON_CONCUR .and. ;
+							.not. JOGOS->( Eof() ) }
 
-local oBrwDezenas
 local aSelDezenas   := {}
-local aDezenas
 local nRow          := 1
 local nPointer
 local nPosDezenas   := 1
-local nLinDezenas
-local nColDezenas
-local nGrade
 
 
 	If SystemConcurso() == pLOTECA
@@ -97,125 +91,130 @@ local nGrade
 				begin sequence
 
 					// Exibe o Browse com as Apostas
-					oBrwConcurso               	:= 	TBrowseDB( 	oWindow:nTop+ 1, oWindow:nLeft+ 1, ;
+					oBrwLoteca               	:= 	TBrowseDB( 	oWindow:nTop+ 1, oWindow:nLeft+ 1, ;
 																oWindow:nBottom-20, oWindow:nRight- 1 )
-					oBrwConcurso:skipBlock     	:= 	{ |xSkip,xRecno| iif( ( xRecno := DBSkipper( xSkip, bFilConcurso ) ) <> 0, ;
+					oBrwLoteca:skipBlock     	:= 	{ |xSkip,xRecno| iif( ( xRecno := DBSkipper( xSkip, bFilConcurso ) ) <> 0, ;
 																			( nCount += xRecno, xRecno ), xRecno ) }
-					oBrwConcurso:goTopBlock    	:= 	{ || nCount := 1, GoTopDB( bFilConcurso ) }
-					oBrwConcurso:goBottomBlock 	:= 	{ || nCount := nMaxItens, GoBottomDB( bFilConcurso ) }
-					oBrwConcurso:colorSpec     	:= SysBrowseColor()
-					oBrwConcurso:headSep       	:= Chr(205)
-					oBrwConcurso:colSep        	:= Chr(179)
-					oBrwConcurso:Cargo         	:= {}
+					oBrwLoteca:goTopBlock    	:= 	{ || nCount := 1, GoTopDB( bFilConcurso ) }
+					oBrwLoteca:goBottomBlock 	:= 	{ || nCount := nMaxItens, GoBottomDB( bFilConcurso ) }
+					oBrwLoteca:colorSpec     	:= SysBrowseColor()
+					oBrwLoteca:headSep       	:= Chr(205)
+					oBrwLoteca:colSep        	:= Chr(179)
+					oBrwLoteca:Cargo         	:= {}
 
 					// Adiciona as Colunas
 					oColumn 			:= TBColumnNew( PadC( 'Concurso', 10 ), CONCURSO->( FieldBlock( 'CON_CONCUR' ) ) )
 					oColumn:picture 	:= '@!'
 					oColumn:width   	:= 10
-					oBrwConcurso:addColumn( oColumn )
+					oBrwLoteca:addColumn( oColumn )
 
 					oColumn 			:= TBColumnNew( PadC( 'Sorteio', 10 ), CONCURSO->( FieldBlock( 'CON_SORTEI' ) ) )
 					oColumn:picture 	:= '@D 99/99/99'
 					oColumn:width   	:= 10
-					oBrwConcurso:addColumn( oColumn )
+					oBrwLoteca:addColumn( oColumn )
 
-					hb_DispBox( oWindow:nBottom-19, oWindow:nLeft+ 1, ;
-								oWindow:nBottom-19, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )                                
+					// Monta a browse com os clubes da competicao
+					begin sequence
 
+						hb_DispBox( oWindow:nBottom-19, oWindow:nLeft+ 1, ;
+									oWindow:nBottom-19, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )                                
 
-					// Cria o Browse com as partidas
-					oBrwPartidas               	:= 	TBrowseNew(	oWindow:nBottom-18, oWindow:nLeft+ 1, ;
-                                                                oWindow:nBottom- 3, oWindow:nRight- 1 )
-					oBrwPartidas:skipBlock     	:=	{ |xSkip| JOGOS->( DBSkipper( xSkip, bFilPartidas ) ) }
-					oBrwPartidas:goTopBlock    	:= 	{ || JOGOS->( GoTopDB( bFilPartidas ) ) }
-					oBrwPartidas:goBottomBlock 	:= 	{ || JOGOS->( GoBottomDB( bFilPartidas ) ) }
-					oBrwPartidas:colorSpec     	:= 	SysBrowseColor()
-					oBrwPartidas:headSep        := 	Chr(205)
-					oBrwPartidas:colSep         := 	Chr(179)
-					oBrwPartidas:autoLite      	:= 	pFALSE
+						// Cria o Browse com as partidas
+						oBrwPartidas               	:= 	TBrowseNew(	oWindow:nBottom-18, oWindow:nLeft+ 1, ;
+																	oWindow:nBottom- 3, oWindow:nRight- 1 )
+						oBrwPartidas:skipBlock     	:=	{ |xSkip| JOGOS->( DBSkipper( xSkip, bFilPartidas ) ) }
+						oBrwPartidas:goTopBlock    	:= 	{ || JOGOS->( GoTopDB( bFilPartidas ) ) }
+						oBrwPartidas:goBottomBlock 	:= 	{ || JOGOS->( GoBottomDB( bFilPartidas ) ) }
+						oBrwPartidas:colorSpec     	:= 	SysBrowseColor()
+						oBrwPartidas:headSep        := 	Chr(205)
+						oBrwPartidas:colSep         := 	Chr(179)
+						oBrwPartidas:autoLite      	:= 	pFALSE
 
-					oColumn         := TBColumnNew( "",                      { || JOGOS->JOG_FAIXA } )
-					oColumn:picture := "@!"
-					oColumn:width   := 02
-					oBrwPartidas:addColumn( oColumn )
+						oColumn         := TBColumnNew( '',                        { || JOGOS->JOG_FAIXA } )
+						oColumn:picture := '@!'
+						oColumn:width   := 02
+						oBrwPartidas:addColumn( oColumn )
 
-					oColumn            := TBColumnNew( PADC( "Coluna 1", 20 ),  {|| PadL( iif( CLUBES->( dbSetOrder(1), dbSeek( JOGOS->JOG_COL_01 ) ),       ;
-																							AllTrim( CLUBES->CLU_ABREVI ) + "/" + AllTrim( CLUBES->CLU_UF ), ;
-																							"" ), 20 ) } )
-					oColumn:picture    := "@!"
-					oColumn:width      := 20
-					oBrwPartidas:addColumn( oColumn )
+						oColumn            := TBColumnNew( PadC( 'Coluna 1', 20 ), {|| PadL( 	iif( CLUBES->( dbSetOrder(1), dbSeek( JOGOS->JOG_COL_01 ) ),     ;
+																								AllTrim( CLUBES->CLU_ABREVI ) + '/' + AllTrim( CLUBES->CLU_UF ), ;
+																								'' ), 20 ) } )
+						oColumn:picture    := '@!'
+						oColumn:width      := 20
+						oBrwPartidas:addColumn( oColumn )
 
-					oColumn            := TBColumnNew( "1",                     {|| iif( JOGOS->JOG_PON_01 > JOGOS->JOG_PON_02, "X", " " ) } )
-					oColumn:picture    := "@!"
-					oColumn:width      := 1
-					oBrwPartidas:addColumn( oColumn )
+						oColumn            := TBColumnNew( '1',                    {|| iif( JOGOS->JOG_PON_01 > JOGOS->JOG_PON_02, 'X', ' ' ) } )
+						oColumn:picture    := '@!'
+						oColumn:width      := 1
+						oBrwPartidas:addColumn( oColumn )
 
-					oColumn            := TBColumnNew( "X",                     {|| iif( JOGOS->JOG_PON_01 == JOGOS->JOG_PON_02, "X", "" ) } )
-					oColumn:picture    := "@!"
-					oColumn:width      := 1
-					oBrwPartidas:addColumn( oColumn )
+						oColumn            := TBColumnNew( 'X',                    {|| iif( JOGOS->JOG_PON_01 == JOGOS->JOG_PON_02, 'X', ' ' ) } )
+						oColumn:picture    := '@!'
+						oColumn:width      := 1
+						oBrwPartidas:addColumn( oColumn )
 
-					oColumn            := TBColumnNew( "2",                     {|| iif( JOGOS->JOG_PON_01 < JOGOS->JOG_PON_02, "X", "" ) } )
-					oColumn:picture    := "@!"
-					oColumn:width      := 1
-					oBrwPartidas:addColumn( oColumn )
+						oColumn            := TBColumnNew( '2',                    {|| iif( JOGOS->JOG_PON_01 < JOGOS->JOG_PON_02, 'X', ' ' ) } )
+						oColumn:picture    := '@!'
+						oColumn:width      := 1
+						oBrwPartidas:addColumn( oColumn )
 
-					oColumn            := TBColumnNew( PADC( "Coluna 2", 20 ),  {|| PadR( iif( CLUBES->( dbSetOrder(1), dbSeek( JOGOS->JOG_COL_02 ) ),        ;
-																							AllTrim( CLUBES->CLU_ABREVI ) + "/" + AllTrim( CLUBES->CLU_UF ), ;
-																							"" ), 20 ) } )
-					oColumn:picture    := "@!"
-					oColumn:width      := 20
-					oBrwPartidas:addColumn( oColumn )
+						oColumn            := TBColumnNew( PadC( 'Coluna 2', 20 ), {|| PadR( iif(	CLUBES->( dbSetOrder(1), dbSeek( JOGOS->JOG_COL_02 ) ),          ;
+																									AllTrim( CLUBES->CLU_ABREVI ) + '/' + AllTrim( CLUBES->CLU_UF ), ;
+																									'' ), 20 ) } )
+						oColumn:picture    := '@!'
+						oColumn:width      := 20
+						oBrwPartidas:addColumn( oColumn )
 
+					always
+						oBrwLoteca:forceStable()
+						oBrwPartidas:forceStable()
+					end sequence
 
 					// Realiza a Montagem da Barra de Rolagem
 					oScrollBar           	:= ScrollBar( oWindow:nTop+ 3, oWindow:nBottom-20, oWindow:nRight )
 					oScrollBar:colorSpec 	:= SysScrollBar()
 					oScrollBar:display()
 
-
 					// Desenha os botoes da tela
 					oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+ 2, ' &Incluir ' )
-					oTmpButton:sBlock    := { || LTCIncluir() }
+					oTmpButton:sBlock    := { || LtcIncluir() }
 					oTmpButton:Style     := ''
 					oTmpButton:ColorSpec := SysPushButton()
-					AAdd( oBrwConcurso:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+					AAdd( oBrwLoteca:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
 
 					oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+12, ' &Modificar ' )
-					oTmpButton:sBlock    := { || LTCModificar() }
+					oTmpButton:sBlock    := { || LtcModificar() }
 					oTmpButton:Style     := ''
 					oTmpButton:ColorSpec := SysPushButton()
-					AAdd( oBrwConcurso:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+					AAdd( oBrwLoteca:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
 
 					oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+24, ' &Excluir ' )
-					oTmpButton:sBlock    := { || LTCExcluir() }
+					oTmpButton:sBlock    := { || LtcExcluir() }
 					oTmpButton:Style     := ''
 					oTmpButton:ColorSpec := SysPushButton()
-					AAdd( oBrwConcurso:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+					AAdd( oBrwLoteca:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
 
 					oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+34, ' Ac&oes ' )
-					oTmpButton:sBlock    := { || LTCAcoes() }
+					oTmpButton:sBlock    := { || LtcAcoes() }
 					oTmpButton:Style     := ''
 					oTmpButton:ColorSpec := SysPushButton()
-					AADD( oBrwConcurso:Cargo, { oTmpButton, UPPER( SUBSTR( oTmpButton:Caption, AT('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+					AAdd( oBrwLoteca:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
 
 					oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+42, ' &Sair ' )
 					oTmpButton:sBlock    := { || lSair := pTRUE }
 					oTmpButton:Style     := ''
 					oTmpButton:ColorSpec := SysPushButton()
-					AAdd( oBrwConcurso:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+					AAdd( oBrwLoteca:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
 
-					AEval( oBrwConcurso:Cargo, { |xItem| xItem[1]:Display() } )
-					oBrwConcurso:Cargo[ nMenuItem ][1]:SetFocus()
+					AEval( oBrwLoteca:Cargo, { |xItem| xItem[1]:Display() } )
+					oBrwLoteca:Cargo[ nMenuItem ][1]:SetFocus()
 
 					while .not. lSair
 
                         // Destaca o registro selecionado no Browse 
-                        oBrwConcurso:colorRect( { oBrwConcurso:rowPos, 1, oBrwConcurso:rowPos, oBrwConcurso:colCount}, {1,2})
-						oBrwConcurso:forceStable()
-						oBrwConcurso:colorRect( { oBrwConcurso:rowPos, oBrwConcurso:freeze + 1, oBrwConcurso:rowPos, oBrwConcurso:colCount}, {8,2})
-						oBrwConcurso:hilite()
+                        oBrwLoteca:colorRect( { oBrwLoteca:rowPos, 1, oBrwLoteca:rowPos, oBrwLoteca:colCount}, {1,2})
+						oBrwLoteca:forceStable()
+						oBrwLoteca:colorRect( { oBrwLoteca:rowPos, oBrwLoteca:freeze + 1, oBrwLoteca:rowPos, oBrwLoteca:colCount}, {8,2})
+						oBrwLoteca:hilite()
 
                         // Atualiza a barra de rolagem
 						oScrollBar:current := nCount * ( 100 / nMaxItens )
@@ -230,72 +229,71 @@ local nGrade
                         // Aguarda a acao do usuario
                         nKey := Inkey( (nRefresh / 1000), INKEY_ALL )
 
-						If oBrwConcurso:stable .and. nKey > 0
+						If oBrwLoteca:stable .and. nKey > 0
 
 							nLastKeyType := hb_MilliSeconds()
 							nRefresh     := 1000					
 
 							do case
 								case ( nPointer := AScan( pBRW_INKEYS, { |xKey| xKey[ pBRW_KEY ] == nKey } ) ) > 0
-                                    Eval( pBRW_INKEYS[ nPointer ][ pBRW_ACTION ], oBrwConcurso )
+                                    Eval( pBRW_INKEYS[ nPointer ][ pBRW_ACTION ], oBrwLoteca )
 
-								case ( nPointer := AScan( oBrwConcurso:Cargo, { |xKey| xKey[ pBRW_ACTION ] == Upper( chr( nKey ) ) } ) ) > 0
-									If oBrwConcurso:Cargo[ nMenuItem ][1]:HasFocus
-										oBrwConcurso:Cargo[ nMenuItem ][1]:KillFocus()
+								case ( nPointer := AScan( oBrwLoteca:Cargo, { |xKey| xKey[ pBRW_ACTION ] == Upper( chr( nKey ) ) } ) ) > 0
+									If oBrwLoteca:Cargo[ nMenuItem ][1]:HasFocus
+										oBrwLoteca:Cargo[ nMenuItem ][1]:KillFocus()
 									EndIf
 									nMenuItem := nPointer
-									oBrwConcurso:Cargo[ nMenuItem ][1]:SetFocus()
+									oBrwLoteca:Cargo[ nMenuItem ][1]:SetFocus()
 
 								case nKey == K_LEFT .or. nKey == K_LBUTTONDOWN
-									If oBrwConcurso:Cargo[ nMenuItem ][1]:HasFocus
-										oBrwConcurso:Cargo[ nMenuItem ][1]:KillFocus()
+									If oBrwLoteca:Cargo[ nMenuItem ][1]:HasFocus
+										oBrwLoteca:Cargo[ nMenuItem ][1]:KillFocus()
 									EndIf
 									If --nMenuItem < 1
 										nMenuItem := 1
 									EndIf
-									oBrwConcurso:Cargo[ nMenuItem ][1]:SetFocus()
+									oBrwLoteca:Cargo[ nMenuItem ][1]:SetFocus()
 
 								case nKey == K_RIGHT .or. nKey == K_RBUTTONUP
-									If oBrwConcurso:Cargo[ nMenuItem ][1]:HasFocus
-										oBrwConcurso:Cargo[ nMenuItem ][1]:KillFocus()
+									If oBrwLoteca:Cargo[ nMenuItem ][1]:HasFocus
+										oBrwLoteca:Cargo[ nMenuItem ][1]:KillFocus()
 									EndIf
-									If ++nMenuItem > Len( oBrwConcurso:Cargo )
-										nMenuItem := Len( oBrwConcurso:Cargo )
+									If ++nMenuItem > Len( oBrwLoteca:Cargo )
+										nMenuItem := Len( oBrwLoteca:Cargo )
 									EndIf
-									oBrwConcurso:Cargo[ nMenuItem ][1]:SetFocus()
+									oBrwLoteca:Cargo[ nMenuItem ][1]:SetFocus()
 
 								case nKey == K_MWFORWARD
-									If MRow() >= oBrwConcurso:nTop .and. MRow() <= oBrwConcurso:nBottom .and. ;
-										Mcol() >= oBrwConcurso:nTop .and. Mcol() <= oBrwConcurso:nRight
-										oBrwConcurso:up()
+									If MRow() >= oBrwLoteca:nTop .and. MRow() <= oBrwLoteca:nBottom .and. ;
+										Mcol() >= oBrwLoteca:nTop .and. Mcol() <= oBrwLoteca:nRight
+										oBrwLoteca:up()
 									EndIf
 
 								case nKey == K_MWBACKWARD
-									If MRow() >= oBrwConcurso:nTop .and. MRow() <= oBrwConcurso:nBottom .and. ;
-										Mcol() >= oBrwConcurso:nTop .and. Mcol() <= oBrwConcurso:nRight
-										oBrwConcurso:down()
+									If MRow() >= oBrwLoteca:nTop .and. MRow() <= oBrwLoteca:nBottom .and. ;
+										Mcol() >= oBrwLoteca:nTop .and. Mcol() <= oBrwLoteca:nRight
+										oBrwLoteca:down()
 									EndIf	
 
 								case nKey == K_ENTER
-									oBrwConcurso:Cargo[ nMenuItem ][1]:Select()
-									oBrwConcurso:refreshAll()
+									oBrwLoteca:Cargo[ nMenuItem ][1]:Select()
+									oBrwLoteca:refreshAll()
 
                             endcase
 
-						else
-							nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 )
-							if nTmp > 720
+						Else
+							If ( nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 ) ) > 720
 								nRefresh := 60000 /* um minuto a cada 12 horas */
-							elseif nTmp > 60
+							ElseIf nTmp > 60
 								nRefresh := 30000
-							elseif nTmp > 15
+							ElseIf nTmp > 15
 								nRefresh := 10000
-							elseif nTmp > 1
+							ElseIf nTmp > 1
 								nRefresh := 3000
-							elseif nTmp > 0
+							ElseIf nTmp > 0
 								nRefresh := 2000
-							endif
-						endif
+							EndIf
+						EndIf
 
 					enddo
 
@@ -304,7 +302,6 @@ local nGrade
 			always
 				// Fecha o Objeto Windows
 				oWindow:Close()
-
 				// Restaura a tabela da Pilha
 				DstkPop()
 			end sequence
@@ -318,14 +315,14 @@ return
 
 /***
 *
-*	LTCIncluir()
+*	LtcIncluir()
 *
 *	Realiza a inclusao dos dados para o concurso da LOTECA.
 *
-*   LTCMntBrowse -> LTCIncluir
+*   LtcMntBrowse -> LtcIncluir
 *
 */
-STATIC PROCEDURE LTCIncluir
+STATIC PROCEDURE LtcIncluir
 
 local aClubes
 local nPointer
@@ -339,571 +336,562 @@ local oIniFile
 memvar xCount, xTemp
 
 
-	If SystemConcurso() == pLOTECA
-
-		If Len( aClubes := LoadClubes() ) > 0	
-
-			If ( nPointer := AScan( pSTRU_SYSTEM, { |xJog| xJog[ pSTRU_JOGO ] == pLOTECA } ) ) > 0
-
-				begin sequence
-
-					// Salva a Area corrente na Pilha
-					DstkPush()
-
-					// Inicializa as Variaveis de Dados
-					xInitLoteca
-
-					// Inicializa as Variaveis de no vetor aLoteca
-					xStoreLoteca
-
-					//
-					// Realiza a abertura do arquivo INI
-					//
-					oIniFile := TIniFile():New( 'odin.ini' )
-
-					//
-					// Parametro para definir a sequencia automatica
-					//
-					If ( cAutoSequence := oIniFile:ReadString( 'LOTECA', 'AUTO_SEQUENCE', '0' ) ) == '1'
-						// Define o codigo sequencial
-						dbEval( { || nCodigo++ }, { || CONCURSO->CON_JOGO == pLOTECA .and. CONCURSO->( .not. Eof() ) } )
-						pLTC_CONCURSO := StrZero( nCodigo, 5 )
-					EndIf
-
-					// Realiza a leitura dos dados do arquivo de configuracao
-					pLTC_PARTIDA_01_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_01_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_01_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_01_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_02_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_02_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_02_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_02_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_03_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_03_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_03_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_03_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_04_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_04_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_04_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_04_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_05_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_05_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_05_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_05_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_06_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_06_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_06_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_06_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_07_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_07_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_07_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_07_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_08_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_08_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_08_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_08_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_09_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_09_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_09_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_09_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_10_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_10_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_10_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_10_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_11_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_11_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_11_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_11_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_12_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_12_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_12_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_12_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_13_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_13_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_13_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_13_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_14_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_14_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_14_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_14_CLUBE_2', Space(5) )
-
-
-					// Cria o Objeto Windows
-					oWindow        := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
-					oWindow:nTop    := INT( SystemMaxRow() / 2 ) - 12
-					oWindow:nLeft   := INT( SystemMaxCol() / 2 ) - 28
-					oWindow:nBottom := INT( SystemMaxRow() / 2 ) + 11
-					oWindow:nRight  := INT( SystemMaxCol() / 2 ) + 28
-					oWindow:Open()
-
-					while lContinua
-
-						@ oWindow:nTop+ 1, oWindow:nLeft+14 GET     pLTC_CONCURSO                                  ;
-															PICT    '@K 99999'                                     ;
-															SEND    VarPut(StrZero(Val(ATail(GetList):VarGet()),5));
-															CAPTION 'Concurso'                                     ;
-															COLOR   SysFieldGet()
-
-						@ oWindow:nTop+ 1, oWindow:nLeft+30 GET     pLTC_SORTEIO                                   ;
-															PICT    '@KD 99/99/99'                                 ;
-															CAPTION 'Sorteio'                                      ;
-															COLOR   SysFieldGet()
-
-						hb_DispBox( oWindow:nTop+ 2, oWindow:nLeft+ 1, ;
-									oWindow:nTop+ 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
-
-						@ oWindow:nTop+ 3, oWindow:nLeft+ 6, ;
-							oWindow:nTop+ 3, oWindow:nLeft+26	GET		pLTC_PARTIDA_01_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 1-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 3, oWindow:nLeft+28 GET		pLTC_PARTIDA_01_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 3, oWindow:nLeft+31, ;
-							oWindow:nTop+ 3, oWindow:nLeft+51	GET		pLTC_PARTIDA_01_CLUBE_2                    ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 3, oWindow:nLeft+53 GET		pLTC_PARTIDA_01_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 4, oWindow:nLeft+ 6, ;
-							oWindow:nTop+ 4, oWindow:nLeft+26	GET		pLTC_PARTIDA_02_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 2-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 4, oWindow:nLeft+28 GET		pLTC_PARTIDA_02_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 4, oWindow:nLeft+31, ;
-							oWindow:nTop+ 4, oWindow:nLeft+51	GET		pLTC_PARTIDA_02_CLUBE_2                    ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 4, oWindow:nLeft+53 GET		pLTC_PARTIDA_02_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 5, oWindow:nLeft+ 6, ;
-							oWindow:nTop+ 5, oWindow:nLeft+26	GET		pLTC_PARTIDA_03_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 3-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 5, oWindow:nLeft+28	GET		pLTC_PARTIDA_03_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 5, oWindow:nLeft+31, ;
-							oWindow:nTop+ 5, oWindow:nLeft+51	GET		pLTC_PARTIDA_03_CLUBE_2                    ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 5, oWindow:nLeft+53 GET		pLTC_PARTIDA_03_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 6, oWindow:nLeft+ 6, ;
-							oWindow:nTop+ 6, oWindow:nLeft+26	GET		pLTC_PARTIDA_04_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 4-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 6, oWindow:nLeft+28	GET		pLTC_PARTIDA_04_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 6, oWindow:nLeft+31, ;
-							oWindow:nTop+ 6, oWindow:nLeft+51	GET		pLTC_PARTIDA_04_CLUBE_2                    ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 6, oWindow:nLeft+53 GET		pLTC_PARTIDA_04_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 7, oWindow:nLeft+ 6, ;
-							oWindow:nTop+ 7, oWindow:nLeft+26	GET		pLTC_PARTIDA_05_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 5-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 7, oWindow:nLeft+28	GET		pLTC_PARTIDA_05_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 7, oWindow:nLeft+31, ;
-							oWindow:nTop+ 7, oWindow:nLeft+51	GET		pLTC_PARTIDA_05_CLUBE_2                    ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 7, oWindow:nLeft+53	GET		pLTC_PARTIDA_05_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 8, oWindow:nLeft+ 6, ;
-							oWindow:nTop+ 8, oWindow:nLeft+26	GET		pLTC_PARTIDA_06_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 6-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 8, oWindow:nLeft+28 GET		pLTC_PARTIDA_06_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 8, oWindow:nLeft+31, ;
-							oWindow:nTop+ 8, oWindow:nLeft+51	GET		pLTC_PARTIDA_06_CLUBE_2                    ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 8, oWindow:nLeft+53 GET		pLTC_PARTIDA_06_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 9, oWindow:nLeft+ 6, ;
-							oWindow:nTop+ 9, oWindow:nLeft+26	GET		pLTC_PARTIDA_07_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 7-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 9, oWindow:nLeft+28	GET		pLTC_PARTIDA_07_RESULTADO_1                    ;
-															PICT 	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+ 9, oWindow:nLeft+31, ;
-							oWindow:nTop+ 9, oWindow:nLeft+51	GET		pLTC_PARTIDA_07_CLUBE_2                    ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 9, oWindow:nLeft+53 GET		pLTC_PARTIDA_07_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+10, oWindow:nLeft+ 6, ;
-							oWindow:nTop+10, oWindow:nLeft+26 	GET		pLTC_PARTIDA_08_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 8-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+10, oWindow:nLeft+28 GET		pLTC_PARTIDA_08_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+10, oWindow:nLeft+31, ;
-							oWindow:nTop+10, oWindow:nLeft+51	GET	pLTC_PARTIDA_08_CLUBE_2                        ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+10, oWindow:nLeft+53 GET		pLTC_PARTIDA_08_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+11, oWindow:nLeft+ 6, ;
-							oWindow:nTop+11, oWindow:nLeft+26	GET		pLTC_PARTIDA_09_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 9-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+11, oWindow:nLeft+28 GET		pLTC_PARTIDA_09_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+11, oWindow:nLeft+31, ;
-							oWindow:nTop+11, oWindow:nLeft+51	GET		pLTC_PARTIDA_09_CLUBE_2                    ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+11, oWindow:nLeft+53	GET		pLTC_PARTIDA_09_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+12, oWindow:nLeft+ 6, ;
-							oWindow:nTop+12, oWindow:nLeft+26	GET		pLTC_PARTIDA_10_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION '10-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+12, oWindow:nLeft+28 GET		pLTC_PARTIDA_10_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+12, oWindow:nLeft+31, ;
-							oWindow:nTop+12, oWindow:nLeft+51	GET		pLTC_PARTIDA_10_CLUBE_2                    ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+12, oWindow:nLeft+53 GET		pLTC_PARTIDA_10_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+13, oWindow:nLeft+ 6, ;
-							oWindow:nTop+13, oWindow:nLeft+26	GET		pLTC_PARTIDA_11_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION '11-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+13, oWindow:nLeft+28 GET		pLTC_PARTIDA_11_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+13, oWindow:nLeft+31, ;
-							oWindow:nTop+13, oWindow:nLeft+51 	GET		pLTC_PARTIDA_11_CLUBE_2                    ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+13, oWindow:nLeft+53 GET		pLTC_PARTIDA_11_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+14, oWindow:nLeft+ 6, ;
-							oWindow:nTop+14, oWindow:nLeft+26 	GET		pLTC_PARTIDA_12_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION '12-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+14, oWindow:nLeft+28 GET		pLTC_PARTIDA_12_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+14, oWindow:nLeft+31, ;
-							oWindow:nTop+14, oWindow:nLeft+51 	GET		pLTC_PARTIDA_12_CLUBE_2                    ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+14, oWindow:nLeft+53 GET		pLTC_PARTIDA_12_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+15, oWindow:nLeft+ 6, ;
-							oWindow:nTop+15, oWindow:nLeft+26	GET		pLTC_PARTIDA_13_CLUBE_1                    ;
-																LISTBOX aClubes                                	   ;
-																CAPTION '13-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+15, oWindow:nLeft+28 GET		pLTC_PARTIDA_13_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+15, oWindow:nLeft+31, ;
-							oWindow:nTop+15, oWindow:nLeft+51	GET		pLTC_PARTIDA_13_CLUBE_2                    ;
-																LISTBOX aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+15, oWindow:nLeft+53 GET		pLTC_PARTIDA_13_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+16, oWindow:nLeft+ 6, ;
-							oWindow:nTop+16, oWindow:nLeft+26	GET		pLTC_PARTIDA_14_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION '14-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+16, oWindow:nLeft+28 GET		pLTC_PARTIDA_14_RESULTADO_1                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-						@ oWindow:nTop+16, oWindow:nLeft+31, ;
-							oWindow:nTop+16, oWindow:nLeft+51	GET		pLTC_PARTIDA_14_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-						@ oWindow:nTop+16, oWindow:nLeft+53 GET		pLTC_PARTIDA_14_RESULTADO_2                    ;
-															PICT  	'@K 99'                                        ;
-															COLOR 	SysFieldGet()
-
-
-						hb_DispBox( oWindow:nTop+17, oWindow:nLeft+ 1, ;
-									oWindow:nTop+17, oWindow:nRight -1, oWindow:cBorder, SystemFormColor() )
-						hb_DispOutAt( oWindow:nTop+ 8, oWindow:nLeft+ 2, ' Premio ', SystemLabelColor() )
-
-						@ oWindow:nTop+18, oWindow:nLeft+12 SAY   'Ganhadores'                                     ;
-															COLOR SystemLabelColor()
-
-						@ oWindow:nTop+18, oWindow:nLeft+30 SAY   'Premio'                                         ;
-															COLOR SystemLabelColor()
-
-
-						// Coluna de Acertos			
-						@ oWindow:nTop+18, oWindow:nLeft+14 GET     pLTC_RATEIO_ACERTO_14                          ;
-															PICT    '@EN 9,999,999,999'                            ;
-															CAPTION '14 Acertos'                                   ;
-															COLOR   SysFieldGet()                                  ;
-															WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '14', pLTC_SORTEIO )
-
-						@ oWindow:nTop+19, oWindow:nLeft+14 GET     pLTC_RATEIO_ACERTO_13                          ;
-															PICT    '@EN 9,999,999,999'                            ;
-															CAPTION '13 Acertos'                                   ;
-															COLOR   SysFieldGet()                                  ;
-															WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '13', pLTC_SORTEIO )
-
-						@ oWindow:nTop+20, oWindow:nLeft+14 GET     pLTC_RATEIO_ACERTO_12                          ;
-															PICT    '@EN 9,999,999,999'                            ;
-															CAPTION '12 Acertos'                                   ;
-															COLOR   SysFieldGet()                                  ;
-															WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '12', pLTC_SORTEIO )
-
-
-						// Coluna de Premios			
-						@ oWindow:nTop+18, oWindow:nLeft+35 GET   pLTC_RATEIO_PREMIO_14                            ;
-															PICT  '@EN 99,999,999,999.99'                          ;
-															COLOR SysFieldGet()                                    ;
-															WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '14', pLTC_SORTEIO )
-
-						@ oWindow:nTop+19, oWindow:nLeft+35 GET   pLTC_RATEIO_PREMIO_13                            ;
-															PICT  '@EN 99,999,999,999.99'                          ;
-															COLOR SysFieldGet()                                    ;
-															WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '13', pLTC_SORTEIO )
-
-						@ oWindow:nTop+20, oWindow:nLeft+35 GET   pLTC_RATEIO_PREMIO_12                            ;
-															PICT  '@EN 99,999,999,999.99'                          ;
-															COLOR SysFieldGet()                                    ;
-															WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '12', pLTC_SORTEIO )
-
-
-						hb_DispBox( oWindow:nBottom- 2, oWindow:nLeft+ 1, ;
-									oWindow:nBottom- 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
-
-						@ oWindow:nBottom- 1, oWindow:nRight-22 GET     lPushButton PUSHBUTTON                     ;
-																CAPTION ' Con&firma '                              ;
-																COLOR   SysPushButton()                            ;
-																STYLE   ''                                         ;
-																WHEN    Val( pLTC_CONCURSO ) > 0 .and.             ;
-																		.not. Empty( pLTC_SORTEIO ) .and.          ;
-																		.not. Empty( pLTC_PARTIDA_01_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_01_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_02_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_02_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_03_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_03_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_04_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_04_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_05_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_05_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_06_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_06_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_07_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_07_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_08_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_08_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_09_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_09_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_10_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_10_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_11_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_11_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_12_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_12_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_13_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_13_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_14_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_14_CLUBE_2 )       ;
-																STATE   { || lContinua := pTRUE, GetActive():ExitState := GE_WRITE }
-
-						@ oWindow:nBottom- 1, oWindow:nRight-11 GET     lPushButton PUSHBUTTON                     ;
-																CAPTION ' Cance&lar '                              ;
-																COLOR   SysPushButton()                            ;
-																STYLE   ''                                         ;
-																STATE   { || lContinua := pFALSE, GetActive():ExitState := GE_ESCAPE }
-
-						Set( _SET_CURSOR, SC_NORMAL )
-
-						READ
-
-						Set( _SET_CURSOR, SC_NONE )
-
-						If lContinua .and. LastKey() != K_ESC
-
-							pLTC_CONCURSO := StrZero( Val( pLTC_CONCURSO ), 5 )
-
-							//************************************************************************
-							//*Verifica se concurso ja existe                                        *
-							//************************************************************************
-							If .not. CONCURSO->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO ) )
-
-								If LTCGravaDados()
-									lContinua := pFALSE
-								EndIf
-
-							Else
-								ErrorTable( '001' )  // Concurso ja Existente.
+	If Len( aClubes := LoadClubes() ) > 0	
+
+		If ( nPointer := AScan( pSTRU_SYSTEM, { |xJog| xJog[ pSTRU_JOGO ] == pLOTECA } ) ) > 0
+
+			begin sequence
+
+				// Salva a Area corrente na Pilha
+				DstkPush()
+
+				// Inicializa as Variaveis de Dados
+				xInitLoteca
+
+				// Inicializa as Variaveis de no vetor aLoteca
+				xStoreLoteca
+
+				//
+				// Realiza a abertura do arquivo INI
+				//
+				oIniFile := TIniFile():New( 'odin.ini' )
+
+				//
+				// Parametro para definir a sequencia automatica
+				//
+				If ( cAutoSequence := oIniFile:ReadString( 'LOTECA', 'AUTO_SEQUENCE', '0' ) ) == '1'
+					// Define o codigo sequencial
+					dbEval( { || nCodigo++ }, { || CONCURSO->CON_JOGO == pLOTECA .and. .not. CONCURSO->( Eof() ) } )
+					pLTC_CONCURSO := StrZero( nCodigo, 5 )
+				EndIf
+
+				// Realiza a leitura dos dados do arquivo de configuracao
+				pLTC_PARTIDA_01_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_01_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_01_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_01_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_02_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_02_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_02_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_02_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_03_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_03_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_03_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_03_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_04_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_04_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_04_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_04_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_05_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_05_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_05_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_05_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_06_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_06_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_06_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_06_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_07_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_07_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_07_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_07_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_08_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_08_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_08_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_08_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_09_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_09_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_09_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_09_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_10_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_10_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_10_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_10_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_11_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_11_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_11_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_11_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_12_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_12_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_12_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_12_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_13_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_13_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_13_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_13_CLUBE_2', Space(5) )
+				pLTC_PARTIDA_14_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_14_CLUBE_1', Space(5) )
+				pLTC_PARTIDA_14_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_14_CLUBE_2', Space(5) )
+
+				// Cria o Objeto Windows
+				oWindow        := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
+				oWindow:nTop    := Int( SystemMaxRow() / 2 ) - 12
+				oWindow:nLeft   := Int( SystemMaxCol() / 2 ) - 28
+				oWindow:nBottom := Int( SystemMaxRow() / 2 ) + 12
+				oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 28
+				oWindow:Open()
+
+				while lContinua
+
+					@ oWindow:nTop+ 1, oWindow:nLeft+14 GET     pLTC_CONCURSO                                  ;
+														PICT    '@K 99999'                                     ;
+														SEND    VarPut(StrZero(Val(ATail(GetList):VarGet()),5));
+														CAPTION 'Concurso'                                     ;
+														COLOR   SysFieldGet()
+
+					@ oWindow:nTop+ 1, oWindow:nLeft+30 GET     pLTC_SORTEIO                                   ;
+														PICT    '@KD 99/99/99'                                 ;
+														CAPTION 'Sorteio'                                      ;
+														COLOR   SysFieldGet()
+
+					hb_DispBox( oWindow:nTop+ 2, oWindow:nLeft+ 1, ;
+								oWindow:nTop+ 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
+
+					@ oWindow:nTop+ 3, oWindow:nLeft+ 6, ;
+						oWindow:nTop+ 3, oWindow:nLeft+26	GET		pLTC_PARTIDA_01_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION ' 1-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 3, oWindow:nLeft+28 GET		pLTC_PARTIDA_01_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 3, oWindow:nLeft+31, ;
+						oWindow:nTop+ 3, oWindow:nLeft+51	GET		pLTC_PARTIDA_01_CLUBE_2                    ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 3, oWindow:nLeft+53 GET		pLTC_PARTIDA_01_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 4, oWindow:nLeft+ 6, ;
+						oWindow:nTop+ 4, oWindow:nLeft+26	GET		pLTC_PARTIDA_02_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION ' 2-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 4, oWindow:nLeft+28 GET		pLTC_PARTIDA_02_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 4, oWindow:nLeft+31, ;
+						oWindow:nTop+ 4, oWindow:nLeft+51	GET		pLTC_PARTIDA_02_CLUBE_2                    ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 4, oWindow:nLeft+53 GET		pLTC_PARTIDA_02_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 5, oWindow:nLeft+ 6, ;
+						oWindow:nTop+ 5, oWindow:nLeft+26	GET		pLTC_PARTIDA_03_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION ' 3-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 5, oWindow:nLeft+28	GET		pLTC_PARTIDA_03_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 5, oWindow:nLeft+31, ;
+						oWindow:nTop+ 5, oWindow:nLeft+51	GET		pLTC_PARTIDA_03_CLUBE_2                    ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 5, oWindow:nLeft+53 GET		pLTC_PARTIDA_03_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 6, oWindow:nLeft+ 6, ;
+						oWindow:nTop+ 6, oWindow:nLeft+26	GET		pLTC_PARTIDA_04_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION ' 4-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 6, oWindow:nLeft+28	GET		pLTC_PARTIDA_04_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 6, oWindow:nLeft+31, ;
+						oWindow:nTop+ 6, oWindow:nLeft+51	GET		pLTC_PARTIDA_04_CLUBE_2                    ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 6, oWindow:nLeft+53 GET		pLTC_PARTIDA_04_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 7, oWindow:nLeft+ 6, ;
+						oWindow:nTop+ 7, oWindow:nLeft+26	GET		pLTC_PARTIDA_05_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION ' 5-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 7, oWindow:nLeft+28	GET		pLTC_PARTIDA_05_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 7, oWindow:nLeft+31, ;
+						oWindow:nTop+ 7, oWindow:nLeft+51	GET		pLTC_PARTIDA_05_CLUBE_2                    ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 7, oWindow:nLeft+53	GET		pLTC_PARTIDA_05_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 8, oWindow:nLeft+ 6, ;
+						oWindow:nTop+ 8, oWindow:nLeft+26	GET		pLTC_PARTIDA_06_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION ' 6-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 8, oWindow:nLeft+28 GET		pLTC_PARTIDA_06_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 8, oWindow:nLeft+31, ;
+						oWindow:nTop+ 8, oWindow:nLeft+51	GET		pLTC_PARTIDA_06_CLUBE_2                    ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 8, oWindow:nLeft+53 GET		pLTC_PARTIDA_06_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 9, oWindow:nLeft+ 6, ;
+						oWindow:nTop+ 9, oWindow:nLeft+26	GET		pLTC_PARTIDA_07_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION ' 7-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 9, oWindow:nLeft+28	GET		pLTC_PARTIDA_07_RESULTADO_1                    ;
+														PICT 	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+ 9, oWindow:nLeft+31, ;
+						oWindow:nTop+ 9, oWindow:nLeft+51	GET		pLTC_PARTIDA_07_CLUBE_2                    ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+ 9, oWindow:nLeft+53 GET		pLTC_PARTIDA_07_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+10, oWindow:nLeft+ 6, ;
+						oWindow:nTop+10, oWindow:nLeft+26 	GET		pLTC_PARTIDA_08_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION ' 8-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+10, oWindow:nLeft+28 GET		pLTC_PARTIDA_08_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+10, oWindow:nLeft+31, ;
+						oWindow:nTop+10, oWindow:nLeft+51	GET	pLTC_PARTIDA_08_CLUBE_2                        ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+10, oWindow:nLeft+53 GET		pLTC_PARTIDA_08_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+11, oWindow:nLeft+ 6, ;
+						oWindow:nTop+11, oWindow:nLeft+26	GET		pLTC_PARTIDA_09_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION ' 9-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+11, oWindow:nLeft+28 GET		pLTC_PARTIDA_09_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+11, oWindow:nLeft+31, ;
+						oWindow:nTop+11, oWindow:nLeft+51	GET		pLTC_PARTIDA_09_CLUBE_2                    ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+11, oWindow:nLeft+53	GET		pLTC_PARTIDA_09_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+12, oWindow:nLeft+ 6, ;
+						oWindow:nTop+12, oWindow:nLeft+26	GET		pLTC_PARTIDA_10_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION '10-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+12, oWindow:nLeft+28 GET		pLTC_PARTIDA_10_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+12, oWindow:nLeft+31, ;
+						oWindow:nTop+12, oWindow:nLeft+51	GET		pLTC_PARTIDA_10_CLUBE_2                    ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+12, oWindow:nLeft+53 GET		pLTC_PARTIDA_10_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+13, oWindow:nLeft+ 6, ;
+						oWindow:nTop+13, oWindow:nLeft+26	GET		pLTC_PARTIDA_11_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION '11-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+13, oWindow:nLeft+28 GET		pLTC_PARTIDA_11_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+13, oWindow:nLeft+31, ;
+						oWindow:nTop+13, oWindow:nLeft+51 	GET		pLTC_PARTIDA_11_CLUBE_2                    ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+13, oWindow:nLeft+53 GET		pLTC_PARTIDA_11_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+14, oWindow:nLeft+ 6, ;
+						oWindow:nTop+14, oWindow:nLeft+26 	GET		pLTC_PARTIDA_12_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION '12-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+14, oWindow:nLeft+28 GET		pLTC_PARTIDA_12_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+14, oWindow:nLeft+31, ;
+						oWindow:nTop+14, oWindow:nLeft+51 	GET		pLTC_PARTIDA_12_CLUBE_2                    ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+14, oWindow:nLeft+53 GET		pLTC_PARTIDA_12_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+15, oWindow:nLeft+ 6, ;
+						oWindow:nTop+15, oWindow:nLeft+26	GET		pLTC_PARTIDA_13_CLUBE_1                    ;
+															LISTBOX aClubes                                	   ;
+															CAPTION '13-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+15, oWindow:nLeft+28 GET		pLTC_PARTIDA_13_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+15, oWindow:nLeft+31, ;
+						oWindow:nTop+15, oWindow:nLeft+51	GET		pLTC_PARTIDA_13_CLUBE_2                    ;
+															LISTBOX aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+15, oWindow:nLeft+53 GET		pLTC_PARTIDA_13_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+16, oWindow:nLeft+ 6, ;
+						oWindow:nTop+16, oWindow:nLeft+26	GET		pLTC_PARTIDA_14_CLUBE_1                    ;
+															LISTBOX aClubes                                    ;
+															CAPTION '14-'                                      ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR   SysFieldListBox()
+
+					@ oWindow:nTop+16, oWindow:nLeft+28 GET		pLTC_PARTIDA_14_RESULTADO_1                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					@ oWindow:nTop+16, oWindow:nLeft+31, ;
+						oWindow:nTop+16, oWindow:nLeft+51	GET		pLTC_PARTIDA_14_CLUBE_2                    ;
+															LISTBOX	aClubes                                    ;
+															DROPDOWN                                           ;
+															SCROLLBAR                                          ;
+															COLOR 	SysFieldListBox()
+
+					@ oWindow:nTop+16, oWindow:nLeft+53 GET		pLTC_PARTIDA_14_RESULTADO_2                    ;
+														PICT  	'@K 99'                                        ;
+														COLOR 	SysFieldGet()
+
+					hb_DispBox( oWindow:nTop+17, oWindow:nLeft+ 1, ;
+								oWindow:nTop+17, oWindow:nRight -1, oWindow:cBorder, SystemFormColor() )
+					hb_DispOutAt( oWindow:nTop+17, oWindow:nLeft+ 2, ' Premio ', SystemLabelColor() )
+
+					@ oWindow:nTop+18, oWindow:nLeft+12 SAY   'Ganhadores'                                     ;
+														COLOR SystemLabelColor()
+
+					@ oWindow:nTop+18, oWindow:nLeft+30 SAY   'Premio'                                         ;
+														COLOR SystemLabelColor()
+
+					// Coluna de Acertos			
+					@ oWindow:nTop+19, oWindow:nLeft+14 GET     pLTC_RATEIO_ACERTO_14                          ;
+														PICT    '@EN 9,999,999,999'                            ;
+														CAPTION '14 Acertos'                                   ;
+														COLOR   SysFieldGet()                                  ;
+														WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '14', pLTC_SORTEIO )
+
+					@ oWindow:nTop+20, oWindow:nLeft+14 GET     pLTC_RATEIO_ACERTO_13                          ;
+														PICT    '@EN 9,999,999,999'                            ;
+														CAPTION '13 Acertos'                                   ;
+														COLOR   SysFieldGet()                                  ;
+														WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '13', pLTC_SORTEIO )
+
+					@ oWindow:nTop+21, oWindow:nLeft+14 GET     pLTC_RATEIO_ACERTO_12                          ;
+														PICT    '@EN 9,999,999,999'                            ;
+														CAPTION '12 Acertos'                                   ;
+														COLOR   SysFieldGet()                                  ;
+														WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '12', pLTC_SORTEIO )
+
+					// Coluna de Premios			
+					@ oWindow:nTop+19, oWindow:nLeft+35 GET   pLTC_RATEIO_PREMIO_14                            ;
+														PICT  '@EN 99,999,999,999.99'                          ;
+														COLOR SysFieldGet()                                    ;
+														WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '14', pLTC_SORTEIO )
+
+					@ oWindow:nTop+20, oWindow:nLeft+35 GET   pLTC_RATEIO_PREMIO_13                            ;
+														PICT  '@EN 99,999,999,999.99'                          ;
+														COLOR SysFieldGet()                                    ;
+														WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '13', pLTC_SORTEIO )
+
+					@ oWindow:nTop+21, oWindow:nLeft+35 GET   pLTC_RATEIO_PREMIO_12                            ;
+														PICT  '@EN 99,999,999,999.99'                          ;
+														COLOR SysFieldGet()                                    ;
+														WHEN  AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '12', pLTC_SORTEIO )
+
+					hb_DispBox( oWindow:nBottom- 2, oWindow:nLeft+ 1, ;
+								oWindow:nBottom- 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
+
+					@ oWindow:nBottom- 1, oWindow:nRight-22 GET     lPushButton PUSHBUTTON                     ;
+															CAPTION ' Con&firma '                              ;
+															COLOR   SysPushButton()                            ;
+															STYLE   ''                                         ;
+															WHEN    Val( pLTC_CONCURSO ) > 0 .and.             ;
+																	.not. Empty( pLTC_SORTEIO ) .and.          ;
+																	.not. Empty( pLTC_PARTIDA_01_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_01_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_02_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_02_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_03_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_03_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_04_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_04_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_05_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_05_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_06_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_06_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_07_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_07_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_08_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_08_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_09_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_09_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_10_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_10_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_11_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_11_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_12_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_12_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_13_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_13_CLUBE_2 ) .and. ;
+																	.not. Empty( pLTC_PARTIDA_14_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_14_CLUBE_2 )       ;
+															STATE   { || lContinua := pTRUE, GetActive():ExitState := GE_WRITE }
+
+					@ oWindow:nBottom- 1, oWindow:nRight-11 GET     lPushButton PUSHBUTTON                     ;
+															CAPTION ' Cance&lar '                              ;
+															COLOR   SysPushButton()                            ;
+															STYLE   ''                                         ;
+															STATE   { || lContinua := pFALSE, GetActive():ExitState := GE_ESCAPE }
+
+					Set( _SET_CURSOR, SC_NORMAL )
+
+					READ
+
+					Set( _SET_CURSOR, SC_NONE )
+
+					If lContinua .and. LastKey() != K_ESC
+
+						pLTC_CONCURSO := StrZero( Val( pLTC_CONCURSO ), 5 )
+
+						//************************************************************************
+						//*Verifica se concurso ja existe                                        *
+						//************************************************************************
+						If .not. CONCURSO->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO ) )
+
+							If LtcGravaDados()
+								lContinua := pFALSE
 							EndIf
 
+						Else
+							ErrorTable( '801' )  // Concurso ja cadastrado.
 						EndIf
 
-					enddo
+					EndIf
 
-				always
-					// Fecha o Objeto Windows
-					oWindow:Close()
+				enddo
 
-					// Atualiza o parametro do arquivo de configuracao de autonumeracao
-					oIniFile:WriteString( 'LOTECA', 'AUTO_SEQUENCE', cAutoSequence )
+			always
+				// Atualiza o parametro do arquivo de configuracao de autonumeracao
+				oIniFile:WriteString( 'LOTECA', 'AUTO_SEQUENCE', cAutoSequence )
 
-					// Atualiza as variaveis do arquivo de confiruacao
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_01_CLUBE_1', pLTC_PARTIDA_01_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_01_CLUBE_2', pLTC_PARTIDA_01_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_02_CLUBE_1', pLTC_PARTIDA_02_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_02_CLUBE_2', pLTC_PARTIDA_02_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_03_CLUBE_1', pLTC_PARTIDA_03_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_03_CLUBE_2', pLTC_PARTIDA_03_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_04_CLUBE_1', pLTC_PARTIDA_04_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_04_CLUBE_2', pLTC_PARTIDA_04_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_05_CLUBE_1', pLTC_PARTIDA_05_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_05_CLUBE_2', pLTC_PARTIDA_05_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_06_CLUBE_1', pLTC_PARTIDA_06_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_06_CLUBE_2', pLTC_PARTIDA_06_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_07_CLUBE_1', pLTC_PARTIDA_07_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_07_CLUBE_2', pLTC_PARTIDA_07_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_08_CLUBE_1', pLTC_PARTIDA_08_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_08_CLUBE_2', pLTC_PARTIDA_08_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_09_CLUBE_1', pLTC_PARTIDA_09_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_09_CLUBE_2', pLTC_PARTIDA_09_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_10_CLUBE_1', pLTC_PARTIDA_10_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_10_CLUBE_2', pLTC_PARTIDA_10_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_11_CLUBE_1', pLTC_PARTIDA_11_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_11_CLUBE_2', pLTC_PARTIDA_11_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_12_CLUBE_1', pLTC_PARTIDA_12_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_12_CLUBE_2', pLTC_PARTIDA_12_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_13_CLUBE_1', pLTC_PARTIDA_13_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_13_CLUBE_2', pLTC_PARTIDA_13_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_14_CLUBE_1', pLTC_PARTIDA_14_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_14_CLUBE_2', pLTC_PARTIDA_14_CLUBE_2 )
+				// Atualiza as variaveis do arquivo de confiruacao
+				oIniFile:WriteString( 'LOTECA', 'LTC_01_CLUBE_1', pLTC_PARTIDA_01_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_01_CLUBE_2', pLTC_PARTIDA_01_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_02_CLUBE_1', pLTC_PARTIDA_02_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_02_CLUBE_2', pLTC_PARTIDA_02_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_03_CLUBE_1', pLTC_PARTIDA_03_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_03_CLUBE_2', pLTC_PARTIDA_03_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_04_CLUBE_1', pLTC_PARTIDA_04_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_04_CLUBE_2', pLTC_PARTIDA_04_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_05_CLUBE_1', pLTC_PARTIDA_05_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_05_CLUBE_2', pLTC_PARTIDA_05_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_06_CLUBE_1', pLTC_PARTIDA_06_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_06_CLUBE_2', pLTC_PARTIDA_06_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_07_CLUBE_1', pLTC_PARTIDA_07_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_07_CLUBE_2', pLTC_PARTIDA_07_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_08_CLUBE_1', pLTC_PARTIDA_08_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_08_CLUBE_2', pLTC_PARTIDA_08_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_09_CLUBE_1', pLTC_PARTIDA_09_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_09_CLUBE_2', pLTC_PARTIDA_09_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_10_CLUBE_1', pLTC_PARTIDA_10_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_10_CLUBE_2', pLTC_PARTIDA_10_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_11_CLUBE_1', pLTC_PARTIDA_11_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_11_CLUBE_2', pLTC_PARTIDA_11_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_12_CLUBE_1', pLTC_PARTIDA_12_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_12_CLUBE_2', pLTC_PARTIDA_12_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_13_CLUBE_1', pLTC_PARTIDA_13_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_13_CLUBE_2', pLTC_PARTIDA_13_CLUBE_2 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_14_CLUBE_1', pLTC_PARTIDA_14_CLUBE_1 )
+				oIniFile:WriteString( 'LOTECA', 'LTC_14_CLUBE_2', pLTC_PARTIDA_14_CLUBE_2 )
 
-					// Atualiza o arquivo de Configuracao
-					oIniFile:UpdateFile()
+				// Atualiza o arquivo de Configuracao
+				oIniFile:UpdateFile()
 
-					// Restaura a tabela da Pilha
-					DstkPop()
-				end sequence
+				// Fecha o Objeto Windows
+				oWindow:Close()
 
-			EndIf
+				// Restaura a tabela da Pilha
+				DstkPop()
+			end sequence
 
-		Else
-			ErrorTable( '002' )  // "Nao existem clubes cadastrados."
 		EndIf
 
+	Else
+		ErrorTable( '802' )  // Nao existem clubes cadastrados.
 	EndIf
 
 return
@@ -918,7 +906,7 @@ return
 *   LTCMntBrowse -> LTCModificar
 *
 */
-STATIC PROCEDURE LTCModificar
+STATIC PROCEDURE LtcModificar
 
 local aClubes
 local nPointer
@@ -934,7 +922,7 @@ memvar xCount, xTemp
 	//************************************************************************
 	If CONCURSO->CON_JOGO == pLOTECA
 
-		If Len( aClubes := LoadClubes() ) > 0			
+		If Len( aClubes := LoadClubes() ) > 0
 
 			If ( nPointer := AScan( pSTRU_SYSTEM, { |xJog| xJog[ pSTRU_JOGO ] == pLOTECA } ) ) > 0
 
@@ -955,81 +943,80 @@ memvar xCount, xTemp
 					pLTC_CONCURSO := CONCURSO->CON_CONCUR
 					pLTC_SORTEIO  := CONCURSO->CON_SORTEI
 
-
 					//************************************************************************
 					//*Carrega o Concurso Selecionado                                        *
 					//************************************************************************
 					If JOGOS->( dbSetOrder(1), dbSeek( CONCURSO->CON_JOGO + CONCURSO->CON_CONCUR ) )
-						WHILE JOGOS->JOG_JOGO == CONCURSO->CON_JOGO .and. ;
-							JOGOS->JOG_CONCUR == CONCURSO->CON_CONCUR .and. .not. ;
-							JOGOS->( Eof() )
+						while JOGOS->JOG_JOGO == CONCURSO->CON_JOGO .and. ;
+							JOGOS->JOG_CONCUR == CONCURSO->CON_CONCUR .and. ;
+							.not. JOGOS->( Eof() )
 							do case
-								case JOGOS->JOG_FAIXA == "01"
+								case JOGOS->JOG_FAIXA == '01'
 									pLTC_PARTIDA_01_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_01_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_01_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_01_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "02"
+								case JOGOS->JOG_FAIXA == '02'
 									pLTC_PARTIDA_02_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_02_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_02_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_02_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "03"
+								case JOGOS->JOG_FAIXA == '03'
 									pLTC_PARTIDA_03_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_03_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_03_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_03_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "04"
+								case JOGOS->JOG_FAIXA == '04'
 									pLTC_PARTIDA_04_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_04_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_04_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_04_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "05"
+								case JOGOS->JOG_FAIXA == '05'
 									pLTC_PARTIDA_05_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_05_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_05_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_05_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "06"
+								case JOGOS->JOG_FAIXA == '06'
 									pLTC_PARTIDA_06_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_06_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_06_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_06_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "07"
+								case JOGOS->JOG_FAIXA == '07'
 									pLTC_PARTIDA_07_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_07_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_07_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_07_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "08"
+								case JOGOS->JOG_FAIXA == '08'
 									pLTC_PARTIDA_08_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_08_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_08_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_08_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "09"
+								case JOGOS->JOG_FAIXA == '09'
 									pLTC_PARTIDA_09_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_09_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_09_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_09_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "10"
+								case JOGOS->JOG_FAIXA == '10'
 									pLTC_PARTIDA_10_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_10_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_10_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_10_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "11"
+								case JOGOS->JOG_FAIXA == '11'
 									pLTC_PARTIDA_11_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_11_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_11_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_11_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "12"
+								case JOGOS->JOG_FAIXA == '12'
 									pLTC_PARTIDA_12_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_12_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_12_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_12_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "13"
+								case JOGOS->JOG_FAIXA == '13'
 									pLTC_PARTIDA_13_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_13_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_13_CLUBE_2     := JOGOS->JOG_COL_02
 									pLTC_PARTIDA_13_RESULTADO_2 := JOGOS->JOG_PON_02
-								case JOGOS->JOG_FAIXA == "14"
+								case JOGOS->JOG_FAIXA == '14'
 									pLTC_PARTIDA_14_CLUBE_1     := JOGOS->JOG_COL_01
 									pLTC_PARTIDA_14_RESULTADO_1 := JOGOS->JOG_PON_01
 									pLTC_PARTIDA_14_CLUBE_2     := JOGOS->JOG_COL_02
@@ -1048,13 +1035,13 @@ memvar xCount, xTemp
 							RATEIO->RAT_CONCUR == CONCURSO->CON_CONCUR .and. .not. ;
 							RATEIO->( Eof() )
 							do case
-								case RATEIO->RAT_FAIXA == "12"
+								case RATEIO->RAT_FAIXA == '12'
 									pLTC_RATEIO_ACERTO_12 := RATEIO->RAT_ACERTA
 									pLTC_RATEIO_PREMIO_12 := RATEIO->RAT_RATEIO
-								case RATEIO->RAT_FAIXA == "13"
+								case RATEIO->RAT_FAIXA == '13'
 									pLTC_RATEIO_ACERTO_13 := RATEIO->RAT_ACERTA
 									pLTC_RATEIO_PREMIO_13 := RATEIO->RAT_RATEIO
-								case RATEIO->RAT_FAIXA == "14"
+								case RATEIO->RAT_FAIXA == '14'
 									pLTC_RATEIO_ACERTO_14 := RATEIO->RAT_ACERTA
 									pLTC_RATEIO_PREMIO_14 := RATEIO->RAT_RATEIO
 							endcase
@@ -1062,16 +1049,15 @@ memvar xCount, xTemp
 						enddo
 					EndIf
 
-
 					// Cria o Objeto Windows
 					oWindow         := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
-					oWindow:nTop    := INT( SystemMaxRow() / 2 ) -  8
-					oWindow:nLeft   := INT( SystemMaxCol() / 2 ) - 21
-					oWindow:nBottom := INT( SystemMaxRow() / 2 ) +  9
-					oWindow:nRight  := INT( SystemMaxCol() / 2 ) + 21
+					oWindow:nTop    := Int( SystemMaxRow() / 2 ) -  8
+					oWindow:nLeft   := Int( SystemMaxCol() / 2 ) - 21
+					oWindow:nBottom := Int( SystemMaxRow() / 2 ) +  9
+					oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 21
 					oWindow:Open()
 
-					WHILE lContinua
+					while lContinua
 
 						@ oWindow:nTop+ 1, oWindow:nLeft+14 GET     pLTC_CONCURSO                                  ;
 															PICT    '@!'                                           ;
@@ -1085,11 +1071,9 @@ memvar xCount, xTemp
 															CAPTION 'Sorteio'                                      ;
 															COLOR   SysFieldGet()
 
-
 						hb_DispBox( oWindow:nTop+ 2, oWindow:nLeft+ 1, ;
 									oWindow:nTop+ 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
 						hb_DispOutAt( oWindow:nTop+ 2, oWindow:nLeft+ 2, ' Dezenas ', SystemLabelColor() )
-
 
 						@ oWindow:nTop+ 3, oWindow:nLeft+ 6, ;
 							oWindow:nTop+ 3, oWindow:nLeft+26	GET		pLTC_PARTIDA_01_CLUBE_1                    ;
@@ -1441,7 +1425,6 @@ memvar xCount, xTemp
 															PICT  	'@K 99'                                        ;
 															COLOR 	SysFieldGet()
 
-
 						hb_DispBox( oWindow:nTop+17, oWindow:nLeft+ 1, ;
 									oWindow:nTop+17, oWindow:nRight -1, oWindow:cBorder, SystemFormColor() )
 						hb_DispOutAt( oWindow:nTop+ 8, oWindow:nLeft+ 2, ' Premio ', SystemLabelColor() )
@@ -1451,7 +1434,6 @@ memvar xCount, xTemp
 
 						@ oWindow:nTop+18, oWindow:nLeft+30 SAY   'Premio'                                         ;
 															COLOR SystemLabelColor()
-
 
 						// Coluna de Acertos			
 						@ oWindow:nTop+18, oWindow:nLeft+14 GET     pLTC_RATEIO_ACERTO_14                          ;
@@ -1471,7 +1453,6 @@ memvar xCount, xTemp
 															CAPTION '12 Acertos'                                   ;
 															COLOR   SysFieldGet()                                  ;
 															WHEN    AvalCondRateio( pSTRU_SYSTEM[ nPointer ][ pSTRU_REGRA_PREMIACAO ], '12', pLTC_SORTEIO )
-
 
 						// Coluna de Premios			
 						@ oWindow:nTop+18, oWindow:nLeft+35 GET   pLTC_RATEIO_PREMIO_14                            ;
@@ -1512,7 +1493,7 @@ memvar xCount, xTemp
 
 						If lContinua .and. LastKey() != K_ESC
 
-							If LTCGravaDados()
+							If LtcGravaDados()
 								lContinua := pFALSE
 							EndIf
 
@@ -1523,7 +1504,6 @@ memvar xCount, xTemp
 				always
 					// Fecha o Objeto Windows
 					oWindow:Close()
-
 					// Restaura a tabela da Pilha
 					DstkPop()
 				end sequence
@@ -1531,7 +1511,7 @@ memvar xCount, xTemp
 			EndIf
 
 		Else
-			ErrorTable( '002' )  // "Nao existem clubes cadastrados."
+			ErrorTable( '802' )  // Nao existem clubes cadastrados.
 		EndIf
 
 	EndIf
@@ -1541,11 +1521,11 @@ return
 
 /***
 *
-*	LTCExcluir()
+*	LtcExcluir()
 *
 *	Realiza a exclusao do concurso da LOTECA.
 *
-*   LTCMntBrowse -> LTCExcluir
+*   LtcMntBrowse -> LtcExcluir
 *
 */
 STATIC PROCEDURE LTCExcluir
@@ -1562,8 +1542,8 @@ STATIC PROCEDURE LTCExcluir
 				// Marca o Registro de rateio do concurso
 				If RATEIO->( dbSetOrder(1), dbSeek( CONCURSO->CON_JOGO + CONCURSO->CON_CONCUR ) )
 					while RATEIO->RAT_JOGO == CONCURSO->CON_JOGO .and. ;
-						RATEIO->RAT_CONCUR == CONCURSO->CON_CONCUR .and. .not. ;
-						RATEIO->( Eof() )
+						RATEIO->RAT_CONCUR == CONCURSO->CON_CONCUR .and. ;
+						.not. RATEIO->( Eof() )
 						If RATEIO->( NetRLock() )
 							RATEIO->( dbDelete() )
 							RATEIO->( dbUnlock() )
@@ -1575,8 +1555,8 @@ STATIC PROCEDURE LTCExcluir
 				// Marca o Registro do jogo do concurso
 				If JOGOS->( dbSetOrder(1), dbSeek( CONCURSO->CON_JOGO + CONCURSO->CON_CONCUR ) )
 					while JOGOS->JOG_JOGO == CONCURSO->CON_JOGO .and. ;
-						JOGOS->JOG_CONCUR == CONCURSO->CON_CONCUR .and. .not. ;
-						JOGOS->( Eof() )
+						JOGOS->JOG_CONCUR == CONCURSO->CON_CONCUR .and. ;
+						.not. JOGOS->( Eof() )
 						If JOGOS->( NetRLock() )
 							JOGOS->( dbDelete() )
 							JOGOS->( dbUnlock() )
@@ -1603,15 +1583,17 @@ STATIC PROCEDURE LTCExcluir
 return
 
 
-
 /***
 *
-*	LTCGravaDados()
+*	LtcGravaDados()
 *
 *	Realiza a gravacao dos dados da LOTECA.
 *
+*   LtcMntBrowse -> LtcIncluir
+*                -> LtcModificar -> LtcGravaDados
+*
 */
-STATIC FUNCTION LTCGravaDados
+STATIC FUNCTION LtcGravaDados
 
 local lRetValue := pFALSE
 
@@ -1627,12 +1609,11 @@ local lRetValue := pFALSE
 				CONCURSO->( dbUnlock() )
 			EndIf
 
-
 			// Gravacao dos dados das Partidas
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "01" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '01' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "01"
+				JOGOS->JOG_FAIXA  := '01'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_01_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_01_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_01_CLUBE_2
@@ -1640,10 +1621,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "02" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '02' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "02"
+				JOGOS->JOG_FAIXA  := '02'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_02_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_02_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_02_CLUBE_2
@@ -1651,10 +1632,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "03" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '03' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "03"
+				JOGOS->JOG_FAIXA  := '03'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_03_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_03_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_03_CLUBE_2
@@ -1662,10 +1643,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "04" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '04' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "04"
+				JOGOS->JOG_FAIXA  := '04'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_04_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_04_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_04_CLUBE_2
@@ -1673,10 +1654,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "05" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '05' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "05"
+				JOGOS->JOG_FAIXA  := '05'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_05_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_05_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_05_CLUBE_2
@@ -1684,10 +1665,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "06" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '06' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "06"
+				JOGOS->JOG_FAIXA  := '06'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_06_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_06_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_06_CLUBE_2
@@ -1695,10 +1676,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "07" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '07' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "07"
+				JOGOS->JOG_FAIXA  := '07'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_07_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_07_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_07_CLUBE_2
@@ -1706,10 +1687,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "08" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '08' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "08"
+				JOGOS->JOG_FAIXA  := '08'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_08_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_08_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_08_CLUBE_2
@@ -1717,10 +1698,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "09" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '09' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "09"
+				JOGOS->JOG_FAIXA  := '09'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_09_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_09_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_09_CLUBE_2
@@ -1728,10 +1709,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "10" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '10' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "10"
+				JOGOS->JOG_FAIXA  := '10'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_10_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_10_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_10_CLUBE_2
@@ -1739,10 +1720,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "11" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '11' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "11"
+				JOGOS->JOG_FAIXA  := '11'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_11_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_11_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_11_CLUBE_2
@@ -1750,10 +1731,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "12" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '12' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "12"
+				JOGOS->JOG_FAIXA  := '12'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_12_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_12_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_12_CLUBE_2
@@ -1761,10 +1742,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "13" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '13' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "13"
+				JOGOS->JOG_FAIXA  := '13'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_13_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_13_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_13_CLUBE_2
@@ -1772,10 +1753,10 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "14" ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
+			If iif( JOGOS->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '14' ) ), JOGOS->( NetRLock() ), JOGOS->( NetAppend() ) )
 				JOGOS->JOG_JOGO   := pLOTECA
 				JOGOS->JOG_CONCUR := pLTC_CONCURSO
-				JOGOS->JOG_FAIXA  := "14"
+				JOGOS->JOG_FAIXA  := '14'
 				JOGOS->JOG_COL_01 := pLTC_PARTIDA_14_CLUBE_1
 				JOGOS->JOG_PON_01 := pLTC_PARTIDA_14_RESULTADO_1
 				JOGOS->JOG_COL_02 := pLTC_PARTIDA_14_CLUBE_2
@@ -1783,33 +1764,32 @@ local lRetValue := pFALSE
 				JOGOS->( dbUnlock() )
 			EndIf
 
-
 			// Gravacao dos dados da Premiacao
-			If iif( RATEIO->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "12" ) ), RATEIO->( NetRLock() ), RATEIO->( NetAppend() ) )
+			If iif( RATEIO->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '12' ) ), RATEIO->( NetRLock() ), RATEIO->( NetAppend() ) )
 				RATEIO->RAT_JOGO    := pLOTECA
 				RATEIO->RAT_CONCUR  := pLTC_CONCURSO
-				RATEIO->RAT_FAIXA   := "12"
+				RATEIO->RAT_FAIXA   := '12'
 				RATEIO->RAT_ACERTA  := pLTC_RATEIO_ACERTO_12
 				RATEIO->RAT_RATEIO  := pLTC_RATEIO_PREMIO_12
-				RATEIO->( DBUnLock() )
+				RATEIO->( dbUnlock() )
 			EndIf
 
-			If iif( RATEIO->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "13" ) ), RATEIO->( NetRLock() ), RATEIO->( NetAppend() ) )
+			If iif( RATEIO->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '13' ) ), RATEIO->( NetRLock() ), RATEIO->( NetAppend() ) )
 				RATEIO->RAT_JOGO    := pLOTECA
 				RATEIO->RAT_CONCUR  := pLTC_CONCURSO
-				RATEIO->RAT_FAIXA   := "13"
+				RATEIO->RAT_FAIXA   := '13'
 				RATEIO->RAT_ACERTA  := pLTC_RATEIO_ACERTO_13
 				RATEIO->RAT_RATEIO  := pLTC_RATEIO_PREMIO_13
-				RATEIO->( DBUnLock() )
+				RATEIO->( dbUnlock() )
 			EndIf
 
-			If iif( RATEIO->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + "14" ) ), RATEIO->( NetRLock() ), RATEIO->( NetAppend() ) )
+			If iif( RATEIO->( dbSetOrder(1), dbSeek( pLOTECA + pLTC_CONCURSO + '14' ) ), RATEIO->( NetRLock() ), RATEIO->( NetAppend() ) )
 				RATEIO->RAT_JOGO    := pLOTECA
 				RATEIO->RAT_CONCUR  := pLTC_CONCURSO
-				RATEIO->RAT_FAIXA   := "14"
+				RATEIO->RAT_FAIXA   := '14'
 				RATEIO->RAT_ACERTA  := pLTC_RATEIO_ACERTO_14
 				RATEIO->RAT_RATEIO  := pLTC_RATEIO_PREMIO_14
-				RATEIO->( DBUnLock() )
+				RATEIO->( dbUnlock() )
 			EndIf
 
 			lRetValue := pTRUE
@@ -1823,11 +1803,11 @@ return( lRetValue )
 
 /***
 *
-*	LTCAcoes()
+*	LtcAcoes()
 *
 *	Exibe o menu de acoes relacionadas.
 *
-*   LTCMntBrowse -> LTCAcoes
+*   LtcMntBrowse -> LtcAcoes
 *
 */
 STATIC PROCEDURE LTCAcoes
@@ -1835,7 +1815,7 @@ STATIC PROCEDURE LTCAcoes
 local lPushButton
 local oWindow
 local lContinua   := pTRUE
-local aGroup      := Array(3)
+local aGroup      := Array(4)
 local nTipAcoes   := 1
 
 
@@ -1843,19 +1823,25 @@ local nTipAcoes   := 1
 
 		// Cria o Objeto Windows	
 		oWindow        := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
-		oWindow:nTop    := Int( SystemMaxRow() / 2 ) -  4
+		oWindow:nTop    := Int( SystemMaxRow() / 2 ) -  5
 		oWindow:nLeft   := Int( SystemMaxCol() / 2 ) - 20
-		oWindow:nBottom := Int( SystemMaxRow() / 2 ) +  3
+		oWindow:nBottom := Int( SystemMaxRow() / 2 ) +  5
 		oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 20
 		oWindow:Open()
 
 		while lContinua
 
-			aGroup[2]           := RadioButton( oWindow:nTop+ 2, oWindow:nLeft+ 4, 'Com&binacoes' )
+			aGroup[1]           := RadioButton( oWindow:nTop+ 2, oWindow:nLeft+ 4, 'Cadastro Clubes' )
+			aGroup[1]:ColorSpec := SysFieldBRadioBox()
+
+			aGroup[2]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+ 4, 'Manutencao Competicoes' )
 			aGroup[2]:ColorSpec := SysFieldBRadioBox()
 
-			aGroup[3]           := RadioButton( oWindow:nTop+ 3, oWindow:nLeft+ 4, 'Impressao &Relacao Resultados' )
+			aGroup[3]           := RadioButton( oWindow:nTop+ 4, oWindow:nLeft+ 4, 'Com&binacoes' )
 			aGroup[3]:ColorSpec := SysFieldBRadioBox()
+
+			aGroup[4]           := RadioButton( oWindow:nTop+ 5, oWindow:nLeft+ 4, 'Impressao &Relacao Resultados' )
+			aGroup[4]:ColorSpec := SysFieldBRadioBox()
 
 			@ oWindow:nTop+ 1, oWindow:nLeft+ 3, ;
 				oWindow:nBottom-3, oWindow:nRight-3 GET        nTipAcoes              ;
@@ -1888,10 +1874,16 @@ local nTipAcoes   := 1
 
 				do case
 					case nTipAcoes == 1
-						LTCCombina()
+						Clubes()
 
 					case nTipAcoes == 2
-						LTCRelResult()
+						Competicoes()
+
+					case nTipAcoes == 3
+						Combina()
+
+					case nTipAcoes == 4
+						Competicoes()
 
 				end case
 
@@ -1909,570 +1901,988 @@ return
 
 /***
 *
-*	LTCCombina()
+*	Combina()
 *
 *	Exibe as opcoes para gerar combinacoes.
 *
-*   LTCMntBrowse -> LTCAcoes -> LTCCombina
+*   LtcMntBrowse -> LtcAcoes -> Combina
 *
 */
-STATIC PROCEDURE LTCCombina
+STATIC PROCEDURE Combina
 
 local aClubes
-local nPointer
 local lContinua     := pTRUE
 local lPushButton
 local oWindow
 local oIniFile
-
 local aGroup        := Array(2)
-local nOpcao        := 1
-
-local nQuantJog     := 1
-local nQuantGrp     := 1
-
-
-
-	If SystemConcurso() == pLOTECA
-
-		If Len( aClubes := LoadClubes() ) > 0	
-
-			If ( nPointer := AScan( pSTRU_SYSTEM, { |xJog| xJog[ pSTRU_JOGO ] == pLOTECA } ) ) > 0
-
-				begin sequence
-
-					// Salva a Area corrente na Pilha
-					DstkPush()
-
-					// Inicializa as Variaveis de Dados
-					xInitLoteca
-
-					// Inicializa as Variaveis de no vetor aLoteca
-					xStoreLoteca
-
-					//
-					// Realiza a abertura do arquivo INI
-					//
-					oIniFile := TIniFile():New( 'odin.ini' )
-
-
-					// Realiza a leitura dos dados do arquivo de configuracao
-					pLTC_PARTIDA_01_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_01_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_01_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_01_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_02_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_02_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_02_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_02_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_03_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_03_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_03_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_03_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_04_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_04_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_04_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_04_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_05_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_05_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_05_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_05_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_06_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_06_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_06_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_06_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_07_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_07_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_07_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_07_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_08_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_08_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_08_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_08_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_09_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_09_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_09_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_09_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_10_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_10_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_10_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_10_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_11_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_11_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_11_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_11_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_12_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_12_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_12_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_12_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_13_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_13_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_13_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_13_CLUBE_2', Space(5) )
-					pLTC_PARTIDA_14_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_14_CLUBE_1', Space(5) )
-					pLTC_PARTIDA_14_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_PARTIDA_14_CLUBE_2', Space(5) )
-
-
-					// Cria o Objeto Windows
-					oWindow        := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
-					oWindow:nTop    := INT( SystemMaxRow() / 2 ) - 11
-					oWindow:nLeft   := INT( SystemMaxCol() / 2 ) - 27
-					oWindow:nBottom := INT( SystemMaxRow() / 2 ) + 12
-					oWindow:nRight  := INT( SystemMaxCol() / 2 ) + 27
-					oWindow:Open()
-
-
-					while lContinua
-
-						aGroup[1]           := RadioButton( oWindow:nTop+ 2, oWindow:nLeft+ 4, 'Aleatorias' )
-						aGroup[1]:ColorSpec := SysFieldBRadioBox()
-
-						aGroup[2]           := RadioButton( oWindow:nTop+ 2, oWindow:nLeft+14, 'Resultados' )
-						aGroup[2]:ColorSpec := SysFieldBRadioBox()
-
-						@ oWindow:nTop+1, oWindow:nLeft+1, ;
-							oWindow:nTop+ 3, oWindow:nRight-1 	GET        nOpcao                                  ;
-																RADIOGROUP aGroup                                  ;
-																COLOR      SysFieldGRadioBox()
-
-						hb_DispBox( oWindow:nTop+ 4, oWindow:nLeft+ 1, ;
-									oWindow:nTop+ 4, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
-
-						@ oWindow:nTop+ 5, oWindow:nLeft+ 6, ;
-							oWindow:nTop+ 5, oWindow:nLeft+26 	GET		pLTC_PARTIDA_01_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 1-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 5, oWindow:nLeft+31, ;
-							oWindow:nTop+ 5, oWindow:nLeft+51	GET		pLTC_PARTIDA_01_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
 
-						@ oWindow:nTop+ 6, oWindow:nLeft+ 6, ;
-							oWindow:nTop+ 6, oWindow:nLeft+26 	GET		pLTC_PARTIDA_02_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 2-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 6, oWindow:nLeft+31, ;
-							oWindow:nTop+ 6, oWindow:nLeft+51	GET		pLTC_PARTIDA_02_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						@ oWindow:nTop+ 7, oWindow:nLeft+ 6, ;
-							oWindow:nTop+ 7, oWindow:nLeft+26 	GET		pLTC_PARTIDA_03_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 3-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 7, oWindow:nLeft+31, ;
-							oWindow:nTop+ 7, oWindow:nLeft+51	GET		pLTC_PARTIDA_03_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						@ oWindow:nTop+ 8, oWindow:nLeft+ 6, ;
-							oWindow:nTop+ 8, oWindow:nLeft+26 	GET		pLTC_PARTIDA_04_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 4-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 8, oWindow:nLeft+31, ;
-							oWindow:nTop+ 8, oWindow:nLeft+51	GET		pLTC_PARTIDA_04_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						@ oWindow:nTop+ 9, oWindow:nLeft+ 6, ;
-							oWindow:nTop+ 9, oWindow:nLeft+26 	GET		pLTC_PARTIDA_05_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 5-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+ 9, oWindow:nLeft+31, ;
-							oWindow:nTop+ 9, oWindow:nLeft+51	GET		pLTC_PARTIDA_05_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						@ oWindow:nTop+10, oWindow:nLeft+ 6, ;
-							oWindow:nTop+10, oWindow:nLeft+26 	GET		pLTC_PARTIDA_06_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 6-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+10, oWindow:nLeft+31, ;
-							oWindow:nTop+10, oWindow:nLeft+51	GET		pLTC_PARTIDA_06_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						@ oWindow:nTop+11, oWindow:nLeft+ 6, ;
-							oWindow:nTop+11, oWindow:nLeft+26 	GET		pLTC_PARTIDA_07_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 7-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+11, oWindow:nLeft+31, ;
-							oWindow:nTop+11, oWindow:nLeft+51	GET		pLTC_PARTIDA_07_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						@ oWindow:nTop+12, oWindow:nLeft+ 6, ;
-							oWindow:nTop+12, oWindow:nLeft+26 	GET		pLTC_PARTIDA_08_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 8-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+12, oWindow:nLeft+31, ;
-							oWindow:nTop+12, oWindow:nLeft+51	GET		pLTC_PARTIDA_08_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						@ oWindow:nTop+13, oWindow:nLeft+ 6, ;
-							oWindow:nTop+13, oWindow:nLeft+26 	GET		pLTC_PARTIDA_09_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION ' 9-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+13, oWindow:nLeft+31, ;
-							oWindow:nTop+13, oWindow:nLeft+51	GET		pLTC_PARTIDA_09_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						@ oWindow:nTop+14, oWindow:nLeft+ 6, ;
-							oWindow:nTop+14, oWindow:nLeft+26 	GET		pLTC_PARTIDA_10_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION '10-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+14, oWindow:nLeft+31, ;
-							oWindow:nTop+14, oWindow:nLeft+51	GET		pLTC_PARTIDA_10_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						@ oWindow:nTop+15, oWindow:nLeft+ 6, ;
-							oWindow:nTop+15, oWindow:nLeft+26 	GET		pLTC_PARTIDA_11_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION '11-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+15, oWindow:nLeft+31, ;
-							oWindow:nTop+15, oWindow:nLeft+51	GET		pLTC_PARTIDA_11_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						@ oWindow:nTop+16, oWindow:nLeft+ 6, ;
-							oWindow:nTop+16, oWindow:nLeft+26 	GET		pLTC_PARTIDA_12_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION '12-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+16, oWindow:nLeft+31, ;
-							oWindow:nTop+16, oWindow:nLeft+51	GET		pLTC_PARTIDA_12_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						@ oWindow:nTop+17, oWindow:nLeft+ 6, ;
-							oWindow:nTop+17, oWindow:nLeft+26 	GET		pLTC_PARTIDA_13_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION '13-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+17, oWindow:nLeft+31, ;
-							oWindow:nTop+17, oWindow:nLeft+51	GET		pLTC_PARTIDA_13_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						@ oWindow:nTop+18, oWindow:nLeft+ 6, ;
-							oWindow:nTop+18, oWindow:nLeft+26 	GET		pLTC_PARTIDA_14_CLUBE_1                    ;
-																LISTBOX aClubes                                    ;
-																CAPTION '14-'                                      ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR   SysFieldListBox()
-
-						@ oWindow:nTop+18, oWindow:nLeft+31, ;
-							oWindow:nTop+18, oWindow:nLeft+51	GET		pLTC_PARTIDA_14_CLUBE_2                    ;
-																LISTBOX	aClubes                                    ;
-																DROPDOWN                                           ;
-																SCROLLBAR                                          ;
-																COLOR 	SysFieldListBox()
-
-
-						hb_DispBox( oWindow:nBottom- 4, oWindow:nLeft+ 1, ;
-									oWindow:nBottom- 4, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
-
-						@ oWindow:nBottom- 3, oWindow:nLeft+ 15 GET     nQuantJog                                  ;
-																PICT    '@EN 99999999999999'                       ;
-																CAPTION 'Quant.Jogos'                              ;
-																COLOR   SysFieldGet()
-			
-						@ oWindow:nBottom- 3, oWindow:nLeft+ 45 GET     nQuantGrp                                  ;
-																PICT    '@EN 999'                                  ;
-																CAPTION 'Quant.Grupos'                             ;
-																COLOR   SysFieldGet()
-
-
-						hb_DispBox( oWindow:nBottom- 2, oWindow:nLeft+ 1, ;
-									oWindow:nBottom- 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
-
-						@ oWindow:nBottom- 1, oWindow:nRight-22 GET     lPushButton PUSHBUTTON                     ;
-																CAPTION ' Con&firma '                              ;
-																COLOR   SysPushButton()                            ;
-																STYLE   ''                                         ;
-																WHEN    nQuantJog >= 1 .and.                       ;
-																		nQuantJog <= pLTC_DEF_MAX_COMB .and.       ;
-																		nQuantGrp >= 1 .and.                       ;
-																		.not. Empty( pLTC_PARTIDA_01_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_01_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_02_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_02_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_03_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_03_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_04_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_04_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_05_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_05_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_06_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_06_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_07_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_07_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_08_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_08_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_09_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_09_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_10_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_10_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_11_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_11_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_12_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_12_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_13_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_13_CLUBE_2 ) .and. ;
-																		.not. Empty( pLTC_PARTIDA_14_CLUBE_1 ) .and. .not. Empty( pLTC_PARTIDA_14_CLUBE_2 )       ;
-																STATE   { || lContinua := pTRUE, GetActive():ExitState := GE_WRITE }
-
-						@ oWindow:nBottom- 1, oWindow:nRight-11 GET     lPushButton PUSHBUTTON                     ;
-																CAPTION ' Cance&lar '                              ;
-																COLOR   SysPushButton()                            ;
-																STYLE   ''                                         ;
-																STATE   { || lContinua := pFALSE, GetActive():ExitState := GE_ESCAPE }
-
-						Set( _SET_CURSOR, SC_NORMAL )
-
-						READ
-
-						Set( _SET_CURSOR, SC_NONE )
-
-						If lContinua .and. LastKey() != K_ESC
 
+	If Len( aClubes := LoadClubes() ) > 0	
+
+		begin sequence
+
+			// Inicializa as Variaveis de Dados
+			xInitMontaLoteca
+
+			// Inicializa as Variaveis de no vetor aLoteca
+			xStoreMontaLoteca
+
+			//
+			// Realiza a abertura do arquivo INI
+			//
+			oIniFile := TIniFile():New( 'odin.ini' )
+
+			// Realiza a leitura dos dados do arquivo de configuracao
+			pLTC_APOSTA_01_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_01_CLUBE_1', Space(5) )
+			pLTC_APOSTA_01_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_01_CLUBE_2', Space(5) )
+			pLTC_APOSTA_02_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_02_CLUBE_1', Space(5) )
+			pLTC_APOSTA_02_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_02_CLUBE_2', Space(5) )
+			pLTC_APOSTA_03_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_03_CLUBE_1', Space(5) )
+			pLTC_APOSTA_03_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_03_CLUBE_2', Space(5) )
+			pLTC_APOSTA_04_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_04_CLUBE_1', Space(5) )
+			pLTC_APOSTA_04_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_04_CLUBE_2', Space(5) )
+			pLTC_APOSTA_05_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_05_CLUBE_1', Space(5) )
+			pLTC_APOSTA_05_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_05_CLUBE_2', Space(5) )
+			pLTC_APOSTA_06_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_06_CLUBE_1', Space(5) )
+			pLTC_APOSTA_06_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_06_CLUBE_2', Space(5) )
+			pLTC_APOSTA_07_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_07_CLUBE_1', Space(5) )
+			pLTC_APOSTA_07_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_07_CLUBE_2', Space(5) )
+			pLTC_APOSTA_08_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_08_CLUBE_1', Space(5) )
+			pLTC_APOSTA_08_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_08_CLUBE_2', Space(5) )
+			pLTC_APOSTA_09_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_09_CLUBE_1', Space(5) )
+			pLTC_APOSTA_09_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_09_CLUBE_2', Space(5) )
+			pLTC_APOSTA_10_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_10_CLUBE_1', Space(5) )
+			pLTC_APOSTA_10_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_10_CLUBE_2', Space(5) )
+			pLTC_APOSTA_11_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_11_CLUBE_1', Space(5) )
+			pLTC_APOSTA_11_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_11_CLUBE_2', Space(5) )
+			pLTC_APOSTA_12_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_12_CLUBE_1', Space(5) )
+			pLTC_APOSTA_12_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_12_CLUBE_2', Space(5) )
+			pLTC_APOSTA_13_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_13_CLUBE_1', Space(5) )
+			pLTC_APOSTA_13_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_13_CLUBE_2', Space(5) )
+			pLTC_APOSTA_14_CLUBE_1 := oIniFile:ReadString( 'LOTECA', 'LTC_14_CLUBE_1', Space(5) )
+			pLTC_APOSTA_14_CLUBE_2 := oIniFile:ReadString( 'LOTECA', 'LTC_14_CLUBE_2', Space(5) )
+
+			// Cria o Objeto Windows
+			oWindow        := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
+			oWindow:nTop    := Int( SystemMaxRow() / 2 ) - 11
+			oWindow:nLeft   := Int( SystemMaxCol() / 2 ) - 27
+			oWindow:nBottom := Int( SystemMaxRow() / 2 ) + 12
+			oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 27
+			oWindow:Open()
+
+			while lContinua
+
+				aGroup[1]           := RadioButton( oWindow:nTop+ 2, oWindow:nLeft+ 8, 'Aleatorias' )
+				aGroup[1]:ColorSpec := SysFieldBRadioBox()
+
+				aGroup[2]           := RadioButton( oWindow:nTop+ 2, oWindow:nLeft+28, 'Resultados' )
+				aGroup[2]:ColorSpec := SysFieldBRadioBox()
+
+				@ oWindow:nTop+1, oWindow:nLeft+1, ;
+					oWindow:nTop+ 3, oWindow:nRight-1 	GET        pLTC_APOSTA_OPCAO                       ;
+														RADIOGROUP aGroup                                  ;
+														COLOR      SysFieldGRadioBox()
+
+				hb_DispBox( oWindow:nTop+ 4, oWindow:nLeft+ 1, ;
+							oWindow:nTop+ 4, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
+
+				@ oWindow:nTop+ 5, oWindow:nLeft+ 6, ;
+					oWindow:nTop+ 5, oWindow:nLeft+26 	GET		pLTC_APOSTA_01_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION ' 1-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+ 5, oWindow:nLeft+31, ;
+					oWindow:nTop+ 5, oWindow:nLeft+51	GET		pLTC_APOSTA_01_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+ 6, oWindow:nLeft+ 6, ;
+					oWindow:nTop+ 6, oWindow:nLeft+26 	GET		pLTC_APOSTA_02_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION ' 2-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+ 6, oWindow:nLeft+31, ;
+					oWindow:nTop+ 6, oWindow:nLeft+51	GET		pLTC_APOSTA_02_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+ 7, oWindow:nLeft+ 6, ;
+					oWindow:nTop+ 7, oWindow:nLeft+26 	GET		pLTC_APOSTA_03_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION ' 3-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+ 7, oWindow:nLeft+31, ;
+					oWindow:nTop+ 7, oWindow:nLeft+51	GET		pLTC_APOSTA_03_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+ 8, oWindow:nLeft+ 6, ;
+					oWindow:nTop+ 8, oWindow:nLeft+26 	GET		pLTC_APOSTA_04_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION ' 4-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+ 8, oWindow:nLeft+31, ;
+					oWindow:nTop+ 8, oWindow:nLeft+51	GET		pLTC_APOSTA_04_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+ 9, oWindow:nLeft+ 6, ;
+					oWindow:nTop+ 9, oWindow:nLeft+26 	GET		pLTC_APOSTA_05_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION ' 5-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+ 9, oWindow:nLeft+31, ;
+					oWindow:nTop+ 9, oWindow:nLeft+51	GET		pLTC_APOSTA_05_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+10, oWindow:nLeft+ 6, ;
+					oWindow:nTop+10, oWindow:nLeft+26 	GET		pLTC_APOSTA_06_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION ' 6-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+10, oWindow:nLeft+31, ;
+					oWindow:nTop+10, oWindow:nLeft+51	GET		pLTC_APOSTA_06_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+11, oWindow:nLeft+ 6, ;
+					oWindow:nTop+11, oWindow:nLeft+26 	GET		pLTC_APOSTA_07_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION ' 7-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+11, oWindow:nLeft+31, ;
+					oWindow:nTop+11, oWindow:nLeft+51	GET		pLTC_APOSTA_07_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+12, oWindow:nLeft+ 6, ;
+					oWindow:nTop+12, oWindow:nLeft+26 	GET		pLTC_APOSTA_08_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION ' 8-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+12, oWindow:nLeft+31, ;
+					oWindow:nTop+12, oWindow:nLeft+51	GET		pLTC_APOSTA_08_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+13, oWindow:nLeft+ 6, ;
+					oWindow:nTop+13, oWindow:nLeft+26 	GET		pLTC_APOSTA_09_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION ' 9-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+13, oWindow:nLeft+31, ;
+					oWindow:nTop+13, oWindow:nLeft+51	GET		pLTC_APOSTA_09_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+14, oWindow:nLeft+ 6, ;
+					oWindow:nTop+14, oWindow:nLeft+26 	GET		pLTC_APOSTA_10_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION '10-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+14, oWindow:nLeft+31, ;
+					oWindow:nTop+14, oWindow:nLeft+51	GET		pLTC_APOSTA_10_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+15, oWindow:nLeft+ 6, ;
+					oWindow:nTop+15, oWindow:nLeft+26 	GET		pLTC_APOSTA_11_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION '11-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+15, oWindow:nLeft+31, ;
+					oWindow:nTop+15, oWindow:nLeft+51	GET		pLTC_APOSTA_11_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+16, oWindow:nLeft+ 6, ;
+					oWindow:nTop+16, oWindow:nLeft+26 	GET		pLTC_APOSTA_12_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION '12-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+16, oWindow:nLeft+31, ;
+					oWindow:nTop+16, oWindow:nLeft+51	GET		pLTC_APOSTA_12_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+17, oWindow:nLeft+ 6, ;
+					oWindow:nTop+17, oWindow:nLeft+26 	GET		pLTC_APOSTA_13_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION '13-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+17, oWindow:nLeft+31, ;
+					oWindow:nTop+17, oWindow:nLeft+51	GET		pLTC_APOSTA_13_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				@ oWindow:nTop+18, oWindow:nLeft+ 6, ;
+					oWindow:nTop+18, oWindow:nLeft+26 	GET		pLTC_APOSTA_14_CLUBE_1                     ;
+														LISTBOX aClubes                                    ;
+														CAPTION '14-'                                      ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR   SysFieldListBox()
+
+				@ oWindow:nTop+18, oWindow:nLeft+31, ;
+					oWindow:nTop+18, oWindow:nLeft+51	GET		pLTC_APOSTA_14_CLUBE_2                     ;
+														LISTBOX	aClubes                                    ;
+														DROPDOWN                                           ;
+														SCROLLBAR                                          ;
+														COLOR 	SysFieldListBox()
+
+				hb_DispBox( oWindow:nBottom- 4, oWindow:nLeft+ 1, ;
+							oWindow:nBottom- 4, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
+
+				@ oWindow:nBottom- 3, oWindow:nLeft+ 15 GET     pLTC_APOSTA_QUANTIDADE_JOGOS               ;
+														PICT    '@EN 99999999999'                          ;
+														CAPTION 'Quant.Jogos'                              ;
+														COLOR   SysFieldGet()
+
+				@ oWindow:nBottom- 3, oWindow:nLeft+ 36 GET     pLTC_APOSTA_DUPLO                          ;
+														PICT    '@EN 99'                                   ;
+														CAPTION 'Duplos'                                   ;
+														COLOR   SysFieldGet()
+
+				@ oWindow:nBottom- 3, oWindow:nLeft+ 49 GET     pLTC_APOSTA_TRIPLO                         ;
+														PICT    '@EN 99'                                   ;
+														CAPTION 'Triplos'                                  ;
+														COLOR   SysFieldGet()
+
+				hb_DispBox( oWindow:nBottom- 2, oWindow:nLeft+ 1, ;
+							oWindow:nBottom- 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
+
+				@ oWindow:nBottom- 1, oWindow:nRight-22 GET     lPushButton PUSHBUTTON                     ;
+														CAPTION ' Con&firma '                              ;
+														COLOR   SysPushButton()                            ;
+														STYLE   ''                                         ;
+														WHEN    pLTC_APOSTA_QUANTIDADE_JOGOS >= 1 .and.    ;
+																pLTC_APOSTA_DUPLO >= 1 .and.               ;
+																pLTC_APOSTA_DUPLO <= 14 .and.              ;
+																pLTC_APOSTA_TRIPLO <= 14 .and.             ;
+																.not. Empty( pLTC_APOSTA_01_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_01_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_02_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_02_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_03_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_03_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_04_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_04_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_05_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_05_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_06_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_06_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_07_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_07_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_08_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_08_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_09_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_09_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_10_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_10_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_11_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_11_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_12_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_12_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_13_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_13_CLUBE_2 ) .and. ;
+																.not. Empty( pLTC_APOSTA_14_CLUBE_1 ) .and. .not. Empty( pLTC_APOSTA_14_CLUBE_2 )       ;
+														STATE   { || lContinua := pTRUE, GetActive():ExitState := GE_WRITE }
+
+				@ oWindow:nBottom- 1, oWindow:nRight-11 GET     lPushButton PUSHBUTTON                     ;
+														CAPTION ' Cance&lar '                              ;
+														COLOR   SysPushButton()                            ;
+														STYLE   ''                                         ;
+														STATE   { || lContinua := pFALSE, GetActive():ExitState := GE_ESCAPE }
+
+				Set( _SET_CURSOR, SC_NORMAL )
+
+				READ
+
+				Set( _SET_CURSOR, SC_NONE )
+
+				If lContinua .and. LastKey() != K_ESC
+
+					begin sequence
+
+						// A quantidade de triplos deve ser menor que a quantidade de jogos duplos
+						If pLTC_APOSTA_TRIPLO < pLTC_APOSTA_DUPLO
+
+							do case
+								case pLTC_APOSTA_OPCAO == 1
+									Aleatoria( pLTC_APOSTA_QUANTIDADE_JOGOS, pLTC_APOSTA_DUPLO, pLTC_APOSTA_TRIPLO )
+
+								case pLTC_APOSTA_OPCAO == 1
+									Aproveitamento( pLTC_APOSTA_QUANTIDADE_JOGOS, pLTC_APOSTA_DUPLO, pLTC_APOSTA_TRIPLO )
+
+							end case
+
+						Else
+							ErrorTable( '803' )  // A quantidade de triplos deve ser menor que a quantidade de jogos duplos
 						EndIf
 
-					enddo
+					always
+						lContinua := pFALSE
+					end sequence
 
-				always
-					// Fecha o Objeto Windows
-					oWindow:Close()
-					
-					// Atualiza as variaveis do arquivo de confiruacao
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_01_CLUBE_1', pLTC_PARTIDA_01_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_01_CLUBE_2', pLTC_PARTIDA_01_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_02_CLUBE_1', pLTC_PARTIDA_02_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_02_CLUBE_2', pLTC_PARTIDA_02_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_03_CLUBE_1', pLTC_PARTIDA_03_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_03_CLUBE_2', pLTC_PARTIDA_03_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_04_CLUBE_1', pLTC_PARTIDA_04_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_04_CLUBE_2', pLTC_PARTIDA_04_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_05_CLUBE_1', pLTC_PARTIDA_05_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_05_CLUBE_2', pLTC_PARTIDA_05_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_06_CLUBE_1', pLTC_PARTIDA_06_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_06_CLUBE_2', pLTC_PARTIDA_06_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_07_CLUBE_1', pLTC_PARTIDA_07_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_07_CLUBE_2', pLTC_PARTIDA_07_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_08_CLUBE_1', pLTC_PARTIDA_08_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_08_CLUBE_2', pLTC_PARTIDA_08_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_09_CLUBE_1', pLTC_PARTIDA_09_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_09_CLUBE_2', pLTC_PARTIDA_09_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_10_CLUBE_1', pLTC_PARTIDA_10_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_10_CLUBE_2', pLTC_PARTIDA_10_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_11_CLUBE_1', pLTC_PARTIDA_11_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_11_CLUBE_2', pLTC_PARTIDA_11_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_12_CLUBE_1', pLTC_PARTIDA_12_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_12_CLUBE_2', pLTC_PARTIDA_12_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_13_CLUBE_1', pLTC_PARTIDA_13_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_13_CLUBE_2', pLTC_PARTIDA_13_CLUBE_2 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_14_CLUBE_1', pLTC_PARTIDA_14_CLUBE_1 )
-					oIniFile:WriteString( 'LOTECA', 'LTC_PARTIDA_14_CLUBE_2', pLTC_PARTIDA_14_CLUBE_2 )
-					
-					// Atualiza o arquivo de Configuracao
-					oIniFile:UpdateFile()
-					
-					// Restaura a tabela da Pilha
-					DstkPop()
-				end sequence
+				EndIf
 
-			EndIf
+			enddo
 
-		Else
-			ErrorTable( '002' )  // "Nao existem clubes cadastrados."
-		EndIf
+		always
+			// Atualiza as variaveis do arquivo de confiruacao
+			oIniFile:WriteString( 'LOTECA', 'LTC_01_CLUBE_1', pLTC_APOSTA_01_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_01_CLUBE_2', pLTC_APOSTA_01_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_02_CLUBE_1', pLTC_APOSTA_02_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_02_CLUBE_2', pLTC_APOSTA_02_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_03_CLUBE_1', pLTC_APOSTA_03_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_03_CLUBE_2', pLTC_APOSTA_03_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_04_CLUBE_1', pLTC_APOSTA_04_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_04_CLUBE_2', pLTC_APOSTA_04_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_05_CLUBE_1', pLTC_APOSTA_05_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_05_CLUBE_2', pLTC_APOSTA_05_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_06_CLUBE_1', pLTC_APOSTA_06_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_06_CLUBE_2', pLTC_APOSTA_06_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_07_CLUBE_1', pLTC_APOSTA_07_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_07_CLUBE_2', pLTC_APOSTA_07_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_08_CLUBE_1', pLTC_APOSTA_08_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_08_CLUBE_2', pLTC_APOSTA_08_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_09_CLUBE_1', pLTC_APOSTA_09_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_09_CLUBE_2', pLTC_APOSTA_09_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_10_CLUBE_1', pLTC_APOSTA_10_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_10_CLUBE_2', pLTC_APOSTA_10_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_11_CLUBE_1', pLTC_APOSTA_11_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_11_CLUBE_2', pLTC_APOSTA_11_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_12_CLUBE_1', pLTC_APOSTA_12_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_12_CLUBE_2', pLTC_APOSTA_12_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_13_CLUBE_1', pLTC_APOSTA_13_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_13_CLUBE_2', pLTC_APOSTA_13_CLUBE_2 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_14_CLUBE_1', pLTC_APOSTA_14_CLUBE_1 )
+			oIniFile:WriteString( 'LOTECA', 'LTC_14_CLUBE_2', pLTC_APOSTA_14_CLUBE_2 )
+			
+			// Atualiza o arquivo de Configuracao
+			oIniFile:UpdateFile()
 
-	EndIf				
+			// Fecha o Objeto Windows
+			oWindow:Close()
+		end sequence
+
+	Else
+		ErrorTable( '802' )  // Nao existem clubes cadastrados.
+	EndIf
 
 return
 
 
 /***
 *
-*	LTCAnaliAleatoria()
+*	Aleatoria()
 *
 *	Realiza a geracao das dezenas para a LOTECA aleatoriamente.
 *
-*   LTCMntBrowse -> LTCAcoes -> LTCCombina -> LTCAnaliAleatoria
+*   LTCMntBrowse -> LTCAcoes -> Combina -> Aleatoria
 *
 *   nQuantJogos : Informa a quantidade de jogos a ser geradas
-* nQuantDezenas : Informa o numero de dezenas a ser geradas por jogos
+*   nQuantDuplo : Quantidade de jogos duplos a ser gerado por cartao
+*  nQuantTriplo : Quantidade de jogos triplos a ser gerado por cartao
 *
 */
-STATIC PROCEDURE LTCAnaliAleatoria( nQuantJogos, nQuantDezenas )
+STATIC PROCEDURE Aleatoria( nQuantJogos, nQuantDuplo, nQuantTriplo )
 
 local aFileTmp       := {}
+local oHBCabec
+local oHBItens
 local oError
-local lFileTmpCreate := pFALSE
-
+local lFileTmpCabec  := pTRUE
+local lFileTmpItens  := pTRUE
 local oBarProgress
-local nPointer
-local nRandom
-local nJogCorrente   := 1
-local nDezena
-local aSequencia
+local nCorrente      := 1
+local hCartao
+local cCartao
+local cResult
+local hTemp
+local nCurrentDuplo
+local cPartida
+local nDuplo
+local nCurrentTriplo
+local nFound
+local aTemp
+
+local cDuplic
+local aDuplic
 
 
-	DEFAULT nQuantJogos   TO 1, ;
-			nQuantDezenas TO pLTF_DEF_MIN_DEZENAS
+	DEFAULT nQuantJogos TO 1
+	DEFAULT nQuantDuplo TO 1
+	DEFAULT nQuantTriplo TO 0
 
-	If Alert( 'Gerar as combinacoes Aleatorias ?', {' Sim ', ' Nao ' } ) == 1
+	begin sequence
 
-		begin sequence
+		// Salva a Area corrente na Pilha
+		DstkPush()
 
-			// Salva a Area corrente na Pilha
-			DstkPush()
+		//
+		// Realiza a criacao do arquivos com os cabecario das apostas
+		//
+		begin sequence with { |oErr| Break( oErr ) }
 
-			begin sequence with { |oErr| Break( oErr ) }
+			AAdd( aFileTmp, { GetNextFile( SystemTmp() ) } )
 
-				AAdd( aFileTmp, { GetNextFile( SystemTmp() ), GetNextFile( SystemTmp() ) } )
+			// Cria a tabela utilizando a classe TTable
+			oHBCabec := HBTable():CreateTable( ATail( aFileTmp )[1] )
 
-				dbCreate( ATail( aFileTmp )[1], { 	{ 'TMP_COD', 'C',  7, 0 },  ;
-													{ 'TMP_SEQ', 'C', 44, 0 },  ;
-													{ 'TMP_MRK', 'C',  1, 0 } } )
+			// Adiciona os campos
+			oHBCabec:AddField( 'CAB_CODIGO', 'C', 5, 0 )
+			oHBCabec:AddField( 'CAB_MRK',    'C', 1, 0 )
 
-				dbUseArea( pTRUE,, ATail( aFileTmp )[1], 'TMP')
-				dbCreateIndex( ATail( aFileTmp )[2], 'TMP_COD', {|| TMP->TMP_COD } )
+			// Executa a criacao da tabela
+			oHBCabec:GenTable()
 
-				lFileTmpCreate := pTRUE
+			oHBCabec := HBTable():New( ATail( aFileTmp )[1], 'CABEC_ALIAS',,, pTRUE,, pTRUE )
+			oHBCabec:addOrder( 'CABEC', 'CAB_CODIGO',,,, pTRUE, {|| FIELD->CAB_CODIGO } )
+			oHBCabec:Open()
+			oHBCabec:Reindex()
+			oHBCabec:SetOrder( 'CABEC' )
 
-			recover using oError
-				If ( oError:genCode == EG_CREATE ) .or. ;
-					( oError:genCode == EG_OPEN ) .or. ;
-					( oError:genCode == EG_CORRUPTION )
-					lFileTmpCreate := pFALSE
-				EndIf
-			end sequence
+		recover using oError
+			If ( oError:genCode == EG_CREATE ) .or. ;
+				( oError:genCode == EG_OPEN ) .or. ;
+				( oError:genCode == EG_CORRUPTION )
+				lFileTmpCabec := pFALSE
+			EndIf
+		end sequence
 
+		//
+		// Realiza a criacao do arquivos com os itens da aposta
+		//
+		begin sequence with { |oErr| Break( oErr ) }
+		
+			AAdd( aFileTmp, { GetNextFile( SystemTmp() ) } )
+			
+			// Cria a tabela usando a Classe TTable
+			oHBItens := HBTable():CreateTable( ATail( aFileTmp )[1] )
+			
+			oHBItens:AddField( 'ITN_CODIGO', 'C', 5, 0 )
+			oHBItens:AddField( 'ITN_FAIXA',  'C', 2, 0 )
+			oHBItens:AddField( 'ITN_COL1',   'C', 5, 0 )
+			oHBItens:AddField( 'ITN_COL2',   'C', 5, 0 )
+			oHBItens:AddField( 'ITN_RESULT', 'C', 5, 0 )
+			
+			// Executa a criacao da tabela
+			oHBItens:Gentable()
 
-			If lFileTmpCreate
+			// Abre a Tabela e cria o indice usando a classe TTable
+			oHBItens := HBTable():New( ATail( aFileTmp )[1], 'ITENS_ALIAS',,, pTRUE,, pTRUE )
+			oHBItens:addOrder( 'ITENS', 'ITN_CODIGO+ITN_FAIXA',,,, pTRUE, {|| FIELD->ITN_CODIGO+FIELD->ITN_FAIXA } )
+			oHBItens:Open()
+			oHBItens:Reindex()
+			oHBItens:SetOrder( 'ITENS' )
+		
+		recover using oError
+			If ( oError:genCode == EG_CREATE ) .or. ;
+				( oError:genCode == EG_OPEN ) .or. ;
+				( oError:genCode == EG_CORRUPTION )
+				lFileTmpItens := pFALSE
+			EndIf
+		end sequence
 
-				If ( nPointer := AScan( pSTRU_SYSTEM, { |xJog| xJog[ pSTRU_JOGO ] == pLOTECA } ) ) > 0
+		// Identifica se as tabelas foram criadas corretamente para inicio do processamento
+		If lFileTmpCabec .and. lFileTmpItens
 
-					begin sequence				
+			begin sequence
 
-						// Inicializa a Barra de Progresso
-						oBarProgress := ProgressBar():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
-						oBarProgress:Open()
+				// Inicia o Objeto da Barra de Progresso
+				oBarProgress := ProgressBar():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
+				oBarProgress:Open()
 
-						while nJogCorrente <= nQuantJogos
+				while nCorrente <= nQuantJogos
 
-							// Atualiza a barra de Progresso
-							oBarProgress:Update( ( nJogCorrente / nQuantJogos ) * 100 )
+					// Atualiza a barra de Progresso
+					oBarProgress:Update( ( nCorrente / nQuantJogos ) * 100 )
 
-							// Declara a variavel para armazenar as Sequencias geradas
-							aSequencia := Array( nQuantDezenas )
+					// Monta o cartao da aposta
+					hCartao := Hb_Hash()
+					for each cCartao in aLoteca[ pLTC_POS_APOSTA_DADOS ]
 
+						// Define o resultado da partida aleatoria
+						
+						switch hb_RandomInt( 1, 3 )
+							case 1
+								cResult := '10000'
+							case 2
+								cResult := '01000'
+							case 3
+								cResult := '00100'
+						end switch
 
-							// Define a primeira sequencia
-							nDezena := 1
-							while nDezena <= nQuantDezenas
+						hTemp := Hb_Hash()
+						hTemp['clube_1'] := cCartao:__enumValue()[1]
+						hTemp['clube_2'] := cCartao:__enumValue()[2]
+						hTemp['resultado'] := cResult
 
-								nRandom := hb_RandInt( Len( pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ] ) )
-								If AScan( aSequencia, { |xSeq| xSeq == pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ][ nRandom ] } ) == 0
-									aSequencia[ nDezena++ ] := pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ][ nRandom ]
-								EndIf
+						hb_Hset( hCartao, Hb_NtoS( cCartao:__enumIndex() ), hTemp )
 
-							enddo
+					next
 
-							// Realiza a gravacao no arquivo temporario
-							TMP->( NetAppend() )
-							TMP->TMP_COD := StrZero( nJogCorrente++, 7 )
-							TMP->TMP_SEQ := ParseString( aSequencia )
-							TMP->( dbUnlock() )
+					// Monta os duplos nos cartoes
+					nCurrentDuplo := 1
+					while nCurrentDuplo <= pLTC_APOSTA_DUPLO
+						cPartida := Hb_NtoS( hb_RandomInt( 1, 14 ) )
+						If SubStr( hCartao[ cPartida ]['resultado'], 4, 1 ) != '1'
+							nDuplo := hb_RandomInt( 1, 3 )
+							If SubStr( hCartao[ cPartida ][ 'resultado' ], nDuplo, 1 ) != '1'
+								// Define o resultado do jogo e marca a coluna de duplos
+								begin sequence
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], nDuplo, 1, '1' )
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], 4, 1, '1' )
+								always
+									nCurrentDuplo++
+								end sequence
+							EndIf
+						EndIf
+					enddo
+
+					// Monta os triplos nos cartoes
+					If pLTC_APOSTA_TRIPLO > 0
+						nCurrentTriplo := 1
+						while nCurrentTriplo <= pLTC_APOSTA_TRIPLO
+							cPartida := Hb_NtoS( hb_RandomInt( 1, 14 ) )
+							// Verifica se o concurso ja nao esta marcado como Duplo
+							If SubStr( hCartao[ cPartida ][ 'resultado' ], 4, 1 ) != '1'
+								// Marca todos os resultados como triplo
+								begin sequence
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], 1, 1, '1' )
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], 2, 1, '1' )
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], 3, 1, '1' )
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], 4, 1, '1' )
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], 5, 1, '1' )
+								always
+									nCurrentTriplo++
+								end sequence
+							EndIf
+						enddo
+					EndIf
+
+					// Evita a duplicidade de jogos
+					begin sequence
+
+						aDuplic := {}
+						for each cDuplic in hCartao
+							If hb_AScan( aDuplic, cDuplic[ 'resultado' ],,, pTRUE ) == 0
+								AAdd( aDuplic, cDuplic[ 'resultado' ] )
+							EndIf
+						next
+
+					always
+
+						nFound := 0
+						oHBCabec:GoTop()
+						while nFound < 14 .and. .not. oHBCabec:Eof()
+
+							nFound := 0
+							If oHBItens:dbSeek( oHBCabec:CAB_CODIGO )
+								while oHBItens:ITN_CODIGO == oHBCabec:CAB_CODIGO .and. ;
+									.not. oHBItens:Eof()
+									If ( hb_HScan( hCartao, { |nKey,cChave| HB_SYMBOL_UNUSED( nKey ), cChave['resultado'] == oHBItens:ITN_RESULT } ) ) > 0
+										nFound++
+									EndIf
+									oHBItens:dbSkip()
+								enddo
+							EndIf
+
+							oHBCabec:dbSkip()
 
 						enddo
 
-					always
-						// Remove a Barra de Progresso
-						oBarProgress:Close()
 					end sequence
 
+					// Grava os dados na tabela temporaria
+					If nFound < 14
 
-					// Exibe as Apostas Geradas
-					If TMP->( LastRec() ) > 0
-						LTCShowAposta()
-					Else
-						ErrorTable( '206' )  // Nao existem informacoes a serem exibidas.
+						begin sequence
+
+							If oHBCabec:Append()
+								oHBCabec:CAB_CODIGO := StrZero( nCorrente, 5 )
+
+								for each cCartao in hCartao
+									If oHBItens:Append()
+										oHBItens:ITN_CODIGO := oHBCabec:CAB_CODIGO
+										oHBItens:ITN_FAIXA  := StrZero( cCartao:__enumIndex(), 2 )
+										oHBItens:ITN_COL1   := cCartao[ 'clube_1' ]
+										oHBItens:ITN_COL2   := cCartao[ 'clube_2' ]
+										oHBItens:ITN_RESULT := cCartao[ 'resultado' ]
+									EndIf
+								next
+
+							EndIf
+
+						always
+							oHBCabec:BUFWrite()
+							oHBItens:BUFWrite()
+							nCorrente++
+						end sequence
+
 					EndIf
 
-					// Fecha os Arquivos Temporarios
-					TMP->( dbCloseArea() )
+				enddo
 
-					// Elimina os arquivos temporarios.
-					AEval( aFileTmp, { |xFile| FErase( xFile[1] ), FErase( xFile[2] ) } )
+			always
+				// Fecha o Objeto oBar
+				oBarProgress:Close()
 
+				// Verifica se existem dados a serem exibidos
+				If .not. oHBCabec:Eof()
+					LTCShowAposta( oHBCabec, oHBItens )
+				Else
+					ErrorTable( '024' )  // Nao existem informacoes a serem exibidas.
 				EndIf
+			end sequence
 
-			Else
-				ErrorTable( '205' )  // Problemas na criacao do arquivo temporario.
+		Else
+			ErrorTable( '205' )  // Problemas na criacao do arquivo temporario.
+		EndIf
+
+	always
+		// Fecha o Temporario cabecario de Jogos
+		oHBCabec:kill()
+			
+		// Fecha Temporario de Itens dos Jogos
+		oHBItens:kill()
+
+		// Elimina os arquivos temporarios
+		for each aTemp in hb_DirScan( hb_DirSepAdd( hb_DirBase() ), oHBCabec:corderBag +'.*' )
+			hb_dbDrop( aTemp[ 1 ] )
+		next
+
+		for each aTemp in hb_DirScan( hb_DirSepAdd( hb_DirBase() ), oHBItens:corderBag +'.*' )
+			hb_dbDrop( aTemp[ 1 ] )
+		next
+
+		// Restaura a tabela da Pilha
+		DstkPop()
+	end sequence
+
+return
+
+
+/***
+*
+*	Aproveitamento()
+*
+*	Realiza a geracao das dezenas para a LOTECA realizando a analise dos clubes nos campeonatos disputados.
+*
+*   LTCMntBrowse -> LTCAcoes -> Combina -> Aproveitamento
+*
+*   nQuantJogos : Informa a quantidade de jogos a ser geradas
+*   nQuantDuplo : Quantidade de jogos duplos a ser gerado por cartao
+*  nQuantTriplo : Quantidade de jogos triplos a ser gerado por cartao
+*
+*/
+STATIC PROCEDURE Aproveitamento( nQuantJogos, nQuantDuplo, nQuantTriplo )
+
+local aFileTmp       := {}
+local oHBCabec
+local oHBItens
+local oError
+local lFileTmpCabec  := pTRUE
+local lFileTmpItens  := pTRUE
+local oBarProgress
+local nCorrente      := 1
+local hCartao
+local cCartao
+local cResult
+local hTemp
+local nCurrentDuplo
+local cPartida
+local nDuplo
+local nCurrentTriplo
+local nFound
+
+
+	DEFAULT nQuantJogos TO 1
+	DEFAULT nQuantDuplo TO 1
+	DEFAULT nQuantTriplo TO 0
+
+	begin sequence
+
+		// Salva a Area corrente na Pilha
+		DstkPush()
+
+		//
+		// Realiza a criacao do arquivos com os cabecario das apostas
+		//
+		begin sequence with { |oErr| Break( oErr ) }
+
+			AAdd( aFileTmp, { GetNextFile( SystemTmp() ) } )
+
+			// Cria a tabela utilizando a classe TTable
+			oHBCabec := HBTable():CreateTable( ATail( aFileTmp )[1] )
+
+			// Adiciona os campos
+			oHBCabec:AddField( 'CAB_CODIGO', 'C', 5, 0 )
+			oHBCabec:AddField( 'CAB_MRK',    'C', 1, 0 )
+
+			// Executa a criacao da tabela
+			oHBCabec:GenTable()
+
+			oHBCabec := HBTable():New( ATail( aFileTmp )[1], 'CABEC_ALIAS',,, pTRUE,, pTRUE )
+			oHBCabec:addOrder( 'CABEC', 'CAB_CODIGO',,,, pTRUE, {|| FIELD->CAB_CODIGO } )
+			oHBCabec:Open()
+			oHBCabec:Reindex()
+			oHBCabec:SetOrder( 'CABEC' )
+
+		recover using oError
+			If ( oError:genCode == EG_CREATE ) .or. ;
+				( oError:genCode == EG_OPEN ) .or. ;
+				( oError:genCode == EG_CORRUPTION )
+				lFileTmpCabec := pFALSE
 			EndIf
-
-		always
-			// Restaura a tabela da Pilha
-			DstkPop()
 		end sequence
 
-	EndIf
+		//
+		// Realiza a criacao do arquivos com os itens da aposta
+		//
+		begin sequence with { |oErr| Break( oErr ) }
+		
+			AAdd( aFileTmp, { GetNextFile( SystemTmp() ) } )
+			
+			// Cria a tabela usando a Classe TTable
+			oHBItens := HBTable():CreateTable( ATail( aFileTmp )[1] )
+			
+			oHBItens:AddField( 'ITN_CODIGO', 'C', 5, 0 )
+			oHBItens:AddField( 'ITN_FAIXA',  'C', 2, 0 )
+			oHBItens:AddField( 'ITN_COL1',   'C', 5, 0 )
+			oHBItens:AddField( 'ITN_COL2',   'C', 5, 0 )
+			oHBItens:AddField( 'ITN_RESULT', 'C', 5, 0 )
+			
+			// Executa a criacao da tabela
+			oHBItens:Gentable()
+
+			// Abre a Tabela e cria o indice usando a classe TTable
+			oHBItens := HBTable():New( ATail( aFileTmp )[1], 'ITENS_ALIAS',,, pTRUE,, pTRUE )
+			oHBItens:addOrder( 'ITENS', 'ITN_CODIGO+ITN_FAIXA',,,, pTRUE, {|| FIELD->ITN_CODIGO+FIELD->ITN_FAIXA } )
+			oHBItens:Open()
+			oHBItens:Reindex()
+			oHBItens:SetOrder( 'ITENS' )
+		
+		recover using oError
+			If ( oError:genCode == EG_CREATE ) .or. ;
+				( oError:genCode == EG_OPEN ) .or. ;
+				( oError:genCode == EG_CORRUPTION )
+				lFileTmpItens := pFALSE
+			EndIf
+		end sequence
+
+		// Identifica se as tabelas foram criadas corretamente para inicio do processamento
+		If lFileTmpCabec .and. lFileTmpItens
+
+			begin sequence
+
+				// Inicia o Objeto da Barra de Progresso
+				oBarProgress := ProgressBar():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
+				oBarProgress:Open()
+
+				while nCorrente <= nQuantJogos
+
+					// Atualiza a barra de Progresso
+					oBarProgress:Update( ( nCorrente / nQuantJogos ) * 100 )
+
+					// Monta o cartao da aposta
+					hCartao := Hb_Hash()
+					for each cCartao in aLoteca[ pLTC_POS_APOSTA_DADOS ]
+
+						// Define o resultado da partida aleatoria
+						
+						switch hb_RandomInt( 1, 3 )
+							case 1
+								cResult := '10000'
+							case 2
+								cResult := '01000'
+							case 3
+								cResult := '00100'
+						end switch
+
+						hTemp := Hb_Hash()
+						hTemp['clube_1'] := cCartao:__enumValue()[1]
+						hTemp['clube_2'] := cCartao:__enumValue()[2]
+						hTemp['resultado'] := cResult
+
+						hb_Hset( hCartao, Hb_NtoS( cCartao:__enumIndex() ), hTemp )
+
+					next
+
+					// Monta os duplos nos cartoes
+					nCurrentDuplo := 1
+					while nCurrentDuplo <= pLTC_APOSTA_DUPLO
+						cPartida := Hb_NtoS( hb_RandomInt( 1, 14 ) )
+						If SubStr( hCartao[ cPartida ]['resultado'], 4, 1 ) != '1'
+							nDuplo := hb_RandomInt( 1, 3 )
+							If SubStr( hCartao[ cPartida ][ 'resultado' ], nDuplo, 1 ) != '1'
+								// Define o resultado do jogo e marca a coluna de duplos
+								begin sequence
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], nDuplo, 1, '1' )
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], 4, 1, '1' )
+								always
+									nCurrentDuplo++
+								end sequence
+							EndIf
+						EndIf
+					enddo
+
+					// Monta os triplos nos cartoes
+					If pLTC_APOSTA_TRIPLO > 0
+						nCurrentTriplo := 1
+						while nCurrentTriplo <= pLTC_APOSTA_TRIPLO
+							cPartida := Hb_NtoS( hb_RandomInt( 1, 14 ) )
+							// Verifica se o concurso ja nao esta marcado como Duplo
+							If SubStr( hCartao[ cPartida ][ 'resultado' ], 4, 1 ) != '1'
+								// Marca todos os resultados como triplo
+								begin sequence
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], 1, 1, '1' )
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], 2, 1, '1' )
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], 3, 1, '1' )
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], 4, 1, '1' )
+									hCartao[ cPartida ][ 'resultado' ] := Stuff( hCartao[ cPartida ][ 'resultado' ], 5, 1, '1' )
+								always
+									nCurrentTriplo++
+								end sequence
+							EndIf
+						enddo
+					EndIf
+
+					// Evita a duplicidade de jogos
+					nFound := 0
+					oHBCabec:GoTop()
+					while nFound < 14 .and. .not. oHBCabec:Eof()
+
+						nFound := 0
+						If oHBItens:dbSeek( oHBCabec:CAB_CODIGO )
+							while oHBItens:ITN_CODIGO == oHBCabec:CAB_CODIGO .and. ;
+								.not. oHBItens:Eof()
+								Eval({ |nKey,cChave| setpos( 10, 20 ), dispout( valtype( nkey ) ), dispout( cChave ) }, hCartao )
+								If ( nteste := hb_HScan( hCartao, { |nKey,cChave| HB_SYMBOL_UNUSED( nKey ), cChave['resultado'] == oHBItens:ITN_RESULT } ) ) > 0
+									nFound++
+								EndIf
+								oHBItens:dbSkip()
+							enddo
+						EndIf
+
+						oHBCabec:dbSkip()
+
+					enddo
+
+					// Grava os dados na tabela temporaria
+					If nFound < 14
+
+						begin sequence
+
+							If oHBCabec:Append()
+								oHBCabec:CAB_CODIGO := StrZero( nCorrente, 5 )
+
+								for each cCartao in hCartao
+									If oHBItens:Append()
+										oHBItens:ITN_CODIGO := oHBCabec:CAB_CODIGO
+										oHBItens:ITN_FAIXA  := StrZero( cCartao:__enumIndex(), 2 )
+										oHBItens:ITN_COL1   := cCartao[ 'clube_1' ]
+										oHBItens:ITN_COL2   := cCartao[ 'clube_2' ]
+										oHBItens:ITN_RESULT := cCartao[ 'resultado' ]
+									EndIf
+								next
+
+							EndIf
+
+						always
+							oHBCabec:BUFWrite()
+							oHBItens:BUFWrite()
+							nCorrente++
+						end sequence
+
+					EndIf
+
+				enddo
+
+			always
+				// Fecha o Objeto oBar
+				oBarProgress:Close()
+
+				// Verifica se existem dados a serem exibidos
+				If .not. oHBCabec:Eof()
+					LTCShowAposta( oHBCabec, oHBItens )
+				Else
+					ErrorTable( '024' )  // Nao existem informacoes a serem exibidas.
+				EndIf
+			end sequence
+
+		Else
+			ErrorTable( '205' )  // Problemas na criacao do arquivo temporario.
+		EndIf
+
+	always
+		// Fecha o Temporario cabecario de Jogos
+		oHBCabec:kill()
+			
+		// Fecha Temporario de Itens dos Jogos
+		oHBItens:kill()
+		
+		// Elimina os arquivos temporarios.
+		AEval( aFileTmp, { |xItem| FErase( xItem[1] ), FErase( xItem[2] ) } )
+
+		// Restaura a tabela da Pilha
+		DstkPop()
+	end sequence
 
 return
 
@@ -2483,343 +2893,302 @@ return
 *
 *	Exibe as apostas gerados no arquivo Temporario.
 *
-*   LTCMntBrowse -> LTCAcoes -> LTCCombina -> LTCAnaliAleatoria -> LTCShowAposta
+*   LTCMntBrowse -> LTCAcoes -> Combina -> Aleatoria
+*                                       -> Aproveitamento -> LTCShowAposta
 *
 */
-STATIC PROCEDURE LTCShowAposta
+STATIC PROCEDURE LTCShowAposta( oHBCabec, oHBItens )
 
 local oBrowse, oColumn
 local oTmpButton, oScrollBar
 local nKey
-local nPosRecno   := 0
-local nMenuItem   := 1
-local nMaxItens   := 0
-local lSair       := pFALSE
+local nTmp
+local nLastKeyType  := hb_MilliSeconds()
+local nRefresh      := 1000              /* um segundo como defaul */
+local nCount        := 0
+local nMenuItem     := 1
+local nMaxItens     := 0
+local lSair         := pFALSE
 local oWindow
-local bFiltro     := { || TMP->( .not. Eof() ) }
+local bFiltro
 
-local oSequen1
-local oSequen2
-local aSelDez1    := {}
-local aSelDez2    := {}
-local aDezenas
-local nRow        := 1
+local bFilPartida
+local oPartida
+
+local aSelDezenas   := {}
+local nRow          := 1
 local nPointer
-local nPosDezenas
-local nLinDezenas
-local nColDezenas
-local nGrade
+local nPosDezenas   := 1
+	
 
+	begin sequence
 
-	If ( nPointer := AScan( pSTRU_SYSTEM, { |xJog| xJog[ pSTRU_JOGO ] == pDUPLA_SENA } ) ) > 0
+		// Salva a Area corrente na Pilha
+		DstkPush()
+
+		// Cria o Objeto Windows
+		oWindow         := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
+		oWindow:nTop    := Int( SystemMaxRow() / 2 ) - 15
+		oWindow:nLeft   := Int( SystemMaxCol() / 2 ) - 28
+		oWindow:nBottom := Int( SystemMaxRow() / 2 ) + 15
+		oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 28
+		oWindow:cHeader := PadC( 'Apostas Geradas', Len( 'Apostas Geradas' ) + 2, ' ')
+		oWindow:Open()
+
+		// Desenha a Linha de Botoes
+		hb_DispBox( oWindow:nBottom- 2, oWindow:nLeft+ 1, ;
+					oWindow:nBottom- 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
+
+		// Estabelece o Filtro para exibicao dos registros
+		bFiltro := { || .not. oHBCabec:Eof() }
+
+		oHBCabec:SetFocus()
+		oHBCabec:dbEval( {|| nMaxItens++ }, bFiltro )
+		oHBCabec:goTop()
 
 		begin sequence
 
-			// Salva a Area corrente na Pilha
-			DstkPush()
+			// Exibe o Browse com as Apostas
+			oBrowse               	:= 	TBrowseDB( oWindow:nTop+ 1, oWindow:nLeft+ 1, ;
+													oWindow:nBottom-20, oWindow:nRight- 1 )
+			oBrowse:skipBlock     	:= 	{ |xSkip,xRecno| iif( ( xRecno := (oHBCabec:Alias)->( DBSkipper( xSkip, bFiltro ) ) ) <> 0, ( nCount += xRecno, xRecno ), xRecno ) }
+			oBrowse:goTopBlock    	:= 	{ || nCount := 1, (oHBCabec:Alias)->( GoTopDB( bFiltro ) ) }
+			oBrowse:goBottomBlock 	:= 	{ || nCount := nMaxItens, (oHBCabec:Alias)->( GoBottomDB( bFiltro ) ) }
+			oBrowse:colorSpec     	:= SysBrowseColor()
+			oBrowse:headSep       	:= Chr(205)
+			oBrowse:colSep        	:= Chr(179)
+			oBrowse:Cargo         	:= {}
 
-			nGrade   := Round( Len( pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ] ) / 10, 0 )
-			aDezenas := Array( nGrade, 10 )
+			// Adiciona as Colunas
+			oColumn 			:= TBColumnNew( '',                   { || oHBCabec:CAB_MRK } )
+			oColumn:picture 	:= '@!'
+			oColumn:width   	:= 1
+			oColumn:colSep      := Chr(179)
+			oBrowse:addColumn( oColumn )
 
-			nPosDezenas := 1
-			for nLinDezenas := 1 to nGrade
-				for nColDezenas := 1 to 10
-					If nPosDezenas <= Len( pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ] )
-						aDezenas[ nLinDezenas ][ nColDezenas ] := pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ][ nPosDezenas ]
-					Else
-						aDezenas[ nLinDezenas ][ nColDezenas ] := '  '
-					EndIf
-					nPosDezenas++
-				next
-			next
+			oColumn 			:= TBColumnNew( PadC( 'Codigo', 8 ),  { || oHBCabec:CAB_CODIGO } )
+			oColumn:picture 	:= '@!'
+			oColumn:width   	:= 8
+			oColumn:colSep      := Chr(179)
+			oBrowse:addColumn( oColumn )
 
-
-			// Cria o Objeto Windows
-			oWindow        	:= WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
-			oWindow:nTop    := Int( SystemMaxRow() / 2 ) - 15
-			oWindow:nLeft   := Int( SystemMaxCol() / 2 ) - 25
-			oWindow:nBottom := Int( SystemMaxRow() / 2 ) + 15
-			oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 25
-			oWindow:cHeader := ' Apostas Geradas '
-			oWindow:Open()
-
-			// Desenha a Linha de Botoes
-			hb_DispBox( oWindow:nBottom- 2, oWindow:nLeft+ 1, ;
-						oWindow:nBottom- 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
-
-
-			dbSelectArea('TMP')
-			TMP->( dbEval( {|| nMaxItens++ }, bFiltro ) )
-			TMP->( dbGoTop() )
-
+			// Monta a browse com os clubes da competicao
 			begin sequence
 
-				// Exibe o Browse com as Apostas
-				oBrowse               	:= 	TBrowseDB( oWindow:nTop+ 1, oWindow:nLeft+ 1, ;
-														( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) + 3 ), oWindow:nRight- 1 )
-				oBrowse:skipBlock     	:= 	{ |xSkip,xRecno| iif( ( xRecno := DBSkipper( xSkip, bFiltro ) ) <> 0, ( nPosRecno += xRecno, xRecno ), xRecno ) }
-				oBrowse:goTopBlock    	:= 	{ || nPosRecno := 1, GoTopDB( bFiltro ) }
-				oBrowse:goBottomBlock 	:= 	{ || nPosRecno := nMaxItens, GoBottomDB( bFiltro ) }
-				oBrowse:colorSpec     	:= SysBrowseColor()
-				oBrowse:colSep        	:= Chr(179)
-				oBrowse:Cargo         	:= {}
+				// Desenha a Linha de dividindo as aapostas dos Cartoes
+				hb_DispBox( oWindow:nBottom-19, oWindow:nLeft+ 1, ;
+							oWindow:nBottom-19, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )	
 
-				// Adiciona as Colunas
-				oColumn         	:= TBColumnNew( '',  TMP->( FieldBlock( 'TMP_COD' ) ) )
-				oColumn:picture 	:= '@!'
-				oBrowse:addColumn( oColumn )
+				// Estabelece o Filtro para exibicao dos registros
+				bFilPartida := { || oHBCabec:CAB_CODIGO == oHBItens:ITN_CODIGO .and. .not. oHBItens:Eof() }
 
-				// Realiza a montagem da exibicao da segunda sequencia
-				hb_DispBox( ( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) + 2 ), oWindow:nLeft+ 1, ;
-							( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) + 2 ), oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
+				oPartida               := TBrowseDB( oWindow:nBottom-18, oWindow:nLeft+ 1,   ;
+														oWindow:nBottom- 3, oWindow:nRight- 1 )
+				oPartida:skipBlock     := { |xSkip,xRecno| iif( ( xRecno := (oHBItens:Alias)->( DBSkipper( xSkip, bFilPartida ) ) ) <> 0, ( nCount += xRecno, xRecno ), xRecno ) }
+				oPartida:goTopBlock    := { || nCount := 1, (oHBItens:Alias)->( GoTopDB( bFilPartida ) ) }
+				oPartida:goBottomBlock := { || nCount := nMaxItens, (oHBItens:Alias)->( GoBottomDB( bFilPartida ) ) }
+				oPartida:colorSpec     := SysBrowseColor()
+				oPartida:headSep       := Chr(205)
+				oPartida:colSep        := Chr(179)
+				oPartida:autoLite      := pFALSE
 
-				oSequen1               	:= 	TBrowseNew( ( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) + 1 ), oWindow:nLeft+ 1, ;
-														( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) - 3 ), oWindow:nRight- 1 )
-				oSequen1:skipBlock     	:= 	{ |x,k| ;
-												k := iif( Abs(x) >= IIF( x >= 0,                          ;
-																	Len( aDezenas ) - nRow, nRow - 1),    ;
-														iif(x >= 0, Len( aDezenas ) - nRow,1 - nRow), x ) ;
-														, nRow += k, k                                    ;
-											}
-				oSequen1:goTopBlock    	:= 	{ || nRow := 1 }
-				oSequen1:goBottomBlock 	:= 	{ || nRow := Len( aDezenas ) }
-				oSequen1:colorSpec     	:= SysBrowseColor()
-				oSequen1:autoLite      	:= pFALSE
+				oColumn            := TBColumnNew( '',                      { || oHBItens:ITN_FAIXA } )
+				oColumn:picture    := '@!'
+				oColumn:width      := 02
+				oPartida:addColumn( oColumn )
 
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 1] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez1, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen1:addColumn( oColumn )
+				oColumn            := TBColumnNew( PadC( 'Coluna 1', 20 ),  {|| PadL( iif( CLUBES->( dbSetOrder(1), dbSeek( oHBItens:ITN_COL1 ) ),  ;
+																				AllTrim( CLUBES->CLU_ABREVI ) + '/' + AllTrim( CLUBES->CLU_UF ), '' ), 20 ) } )
+				oColumn:picture    := '@!'
+				oColumn:width      := 20
+				oPartida:addColumn( oColumn )
 
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 2] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez1, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen1:addColumn( oColumn )
+				oColumn            := TBColumnNew( '1',                     {|| iif( SubStr( oHBItens:ITN_RESULT, 1, 1 ) == '1', 'X', '' ) } )
+				oColumn:picture    := '@!'
+				oColumn:width      := 1
+				oPartida:addColumn( oColumn )
 
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 3] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez1, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen1:addColumn( oColumn )
+				oColumn            := TBColumnNew( 'X',                     {|| iif( SubStr( oHBItens:ITN_RESULT, 2, 1 ) == '1', 'X', '' ) } )
+				oColumn:picture    := '@!'
+				oColumn:width      := 1
+				oPartida:addColumn( oColumn )
 
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 4] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez1, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen1:addColumn( oColumn )
+				oColumn            := TBColumnNew( '2',                     {|| iif( SubStr( oHBItens:ITN_RESULT, 3, 1 ) == '1', 'X', '' ) } )
+				oColumn:picture    := '@!'
+				oColumn:width      := 1
+				oPartida:addColumn( oColumn )
 
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 5] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez1, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen1:addColumn( oColumn )
+				oColumn            := TBColumnNew( PadC( 'Coluna 2', 20 ),  {|| PadR( iif( CLUBES->( dbSetOrder(1), dbSeek( oHBItens:ITN_COL2 ) ), ;
+																				AllTrim( CLUBES->CLU_ABREVI ) + '/' + AllTrim( CLUBES->CLU_UF ), '' ), 20 ) } )
+				oColumn:picture    := '@!'
+				oColumn:width      := 20
+				oPartida:addColumn( oColumn )
 
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 6] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez1, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen1:addColumn( oColumn )
+				oColumn            := TBColumnNew( 'D',                     {|| iif( SubStr( oHBItens:ITN_RESULT, 4, 1 ) == '1', 'X', '' ) } )
+				oColumn:picture    := '@!'
+				oColumn:width      := 1
+				oPartida:addColumn( oColumn )
 
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 7] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez1, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen1:addColumn( oColumn )
+				oColumn            := TBColumnNew( 'T',                     {|| iif( SubStr( oHBItens:ITN_RESULT, 5, 1 ) == '1', 'X', '' ) } )
+				oColumn:picture    := '@!'
+				oColumn:width      := 1
+				oPartida:addColumn( oColumn )
 
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 8] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez1, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen1:addColumn( oColumn )
-
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 9] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez1, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen1:addColumn( oColumn )
-
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][10] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez1, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen1:addColumn( oColumn )
-
-
-				// Realiza a montagem da exibicao da segunda sequencia
-				hb_DispBox( ( oWindow:nBottom- 2 ) - ( nGrade + 1 ), oWindow:nLeft+ 1, ;
-							( oWindow:nBottom- 2 ) - ( nGrade + 1 ), oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
-
-				// Exibe a Segunda Coluna de Dezenas
-				oSequen2               	:= 	TBrowseNew( ( oWindow:nBottom- 2 ) - nGrade, oWindow:nLeft+ 1, ;
-														( oWindow:nBottom- 2 ) - 1, oWindow:nRight- 1 )
-				oSequen2:skipBlock     	:= 	{ |x,k| ;
-												k := iif( Abs(x) >= iif( x >= 0,                          ;
-																	Len( aDezenas ) - nRow, nRow - 1),    ;
-														iif(x >= 0, Len( aDezenas ) - nRow,1 - nRow), x ) ;
-														, nRow += k, k                                    ;
-											}
-				oSequen2:goTopBlock    	:= 	{ || nRow := 1 }
-				oSequen2:goBottomBlock 	:= 	{ || nRow := Len( aDezenas ) }
-				oSequen2:colorSpec     	:= SysBrowseColor()
-				oSequen2:autoLite      	:= pFALSE
-
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 1] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez2, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen2:addColumn( oColumn )
-
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 2] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez2, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen2:addColumn( oColumn )
-
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 3] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez2, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen2:addColumn( oColumn )
-
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 4] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez2, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen2:addColumn( oColumn )
-
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 5] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez2, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen2:addColumn( oColumn )
-
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 6] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez2, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen2:addColumn( oColumn )
-
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 7] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez2, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen2:addColumn( oColumn )
-
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 8] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez2, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen2:addColumn( oColumn )
-
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][ 9] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez2, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen2:addColumn( oColumn )
-
-				oColumn            	:= TBColumnNew( '', { || aDezenas[ nRow ][10] } )
-				oColumn:colorBlock 	:= { |xDez| iif( hb_AScan( aSelDez2, xDez,,, pTRUE ) > 0, {3,2}, {1,2} ) }
-				oColumn:width      	:= 2
-				oSequen2:addColumn( oColumn )
-
-
-				// Realiza a Montagem da Barra de Rolagem
-				oScrollBar         		:= ScrollBar( oWindow:nTop+ 1, ( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) + 3 ), ;
-														oWindow:nRight )
-				oScrollBar:colorSpec 	:= SysScrollBar()
-				oScrollBar:display()
-
-
-				// Desenha os botoes da tela
-				oTmpButton           	:= PushButton( oWindow:nBottom- 1, oWindow:nLeft+ 2, ' Gerar &Aposta ' )
-				oTmpButton:sBlock    	:= { || Nil }
-				oTmpButton:Style     	:= ''
-				oTmpButton:ColorSpec 	:= SysPushButton()
-				AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
-
-				oTmpButton           	:= PushButton( oWindow:nBottom- 1, oWindow:nLeft+17, ' &Sair ' )
-				oTmpButton:sBlock    	:= { || lSair := pTRUE }
-				oTmpButton:Style     	:= ''
-				oTmpButton:ColorSpec 	:= SysPushButton()
-				AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
-
-				AEval( oBrowse:Cargo, { |xItem| xItem[1]:Display() } )
-				oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
-
-				while .not. lSair
-
-					// Destaca o registro selecionado no Browse 
-					oBrowse:colorRect( { oBrowse:rowPos, 1, oBrowse:rowPos, oBrowse:colCount}, {1,2})
-					oBrowse:forceStable()
-					oBrowse:colorRect( { oBrowse:rowPos, oBrowse:freeze + 1, oBrowse:rowPos, oBrowse:colCount}, {8,2})
-					oBrowse:hilite()
-
-					// Atualiza a barra de rolagem
-					oScrollBar:current := nPosRecno * ( 100 / nMaxItens )
-					oScrollBar:update()
-
-					// Atualiza a grade com as dezenas da primeira sequencia
-					If Len( aSelDez1 := ParseDezenas( TMP->TMP_SEQ1 ) ) > 0
-						oSequen1:refreshCurrent()
-						oSequen1:forceStable()
-					EndIf
-
-					// Atualiza a grade com as dezenas da segunda sequencia
-					If Len( aSelDez2 := ParseDezenas( TMP->TMP_SEQ2 ) ) > 0
-						oSequen2:refreshCurrent()
-						oSequen2:forceStable()
-					EndIf
-
-					// Aguarda a acao do usuario
-					nKey := Inkey( 1000, INKEY_ALL )
-
-					If oBrowse:stable
-
-						do case
-							case ( nPointer := AScan( pBRW_INKEYS, { |xKey| xKey[ pBRW_KEY ] == nKey } ) ) > 0
-								Eval( pBRW_INKEYS[ nPointer ][ pBRW_ACTION ], oBrowse )
-
-							case ( nPointer := AScan( oBrowse:Cargo, { |xKey| xKey[ pBRW_KEY ] == Upper( Chr( nKey ) ) } ) ) > 0
-								If oBrowse:Cargo[ nMenuItem ][1]:HasFocus
-									oBrowse:Cargo[ nMenuItem ][1]:KillFocus()
-								EndIf
-								nMenuItem := nPointer
-								oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
-
-							case nKey == K_LEFT .or. nKey == K_LBUTTONDOWN
-								If oBrowse:Cargo[ nMenuItem ][1]:HasFocus
-									oBrowse:Cargo[ nMenuItem ][1]:KillFocus()
-								EndIf
-								If --nMenuItem < 1
-									nMenuItem := 1
-								EndIf
-								oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
-
-							case nKey == K_RIGHT .or. nKey == K_RBUTTONUP
-								If oBrowse:Cargo[ nMenuItem ][1]:HasFocus
-									oBrowse:Cargo[ nMenuItem ][1]:KillFocus()
-								EndIf
-								If ++nMenuItem > Len( oBrowse:Cargo )
-									nMenuItem := Len( oBrowse:Cargo )
-								EndIf
-								oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
-
-							case nKey == K_MWFORWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
-									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
-									oBrowse:up()
-								EndIf
-
-							case nKey == K_MWBACKWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
-									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
-									oBrowse:down()
-								EndIf	
-
-							case nKey == K_ENTER
-								oBrowse:Cargo[ nMenuItem ][1]:Select()
-								oBrowse:refreshAll()
-
-						endcase
-
-					EndIf
-
-				enddo
-
+			always
+				oBrowse:forceStable()
+				oPartida:forceStable()
 			end sequence
 
-		always
-			// Fecha o Objeto Windows
-			oWindow:Close()
+			// Realiza a Montagem da Barra de Rolagem
+			oScrollBar           := ScrollBar( oWindow:nTop+ 3, oWindow:nBottom- 3, oWindow:nRight )
+			oScrollBar:colorSpec := SysScrollBar()
+			oScrollBar:display()
 
-			// Restaura a tabela da Pilha
-			DstkPop()
+			// Desenha os botoes da tela
+			oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+ 2, ' &Incluir ' )
+//			oTmpButton:sBlock    := { || Incluir() }
+			oTmpButton:Style     := ''
+			oTmpButton:ColorSpec := SysPushButton()
+			AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+
+			oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+12, ' &Modificar ' )
+//			oTmpButton:sBlock    := { || Modificar() }
+			oTmpButton:Style     := ''
+			oTmpButton:ColorSpec := SysPushButton()
+			AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+
+			oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+24, ' &Excluir ' )
+//			oTmpButton:sBlock    := { || Excluir() }
+			oTmpButton:Style     := ''
+			oTmpButton:ColorSpec := SysPushButton()
+			AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+
+			oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+34, ' Gr&upos ' )
+//			oTmpButton:sBlock    := { || Grupos() }
+			oTmpButton:Style     := ''
+			oTmpButton:ColorSpec := SysPushButton()
+			AADD( oBrowse:Cargo, { oTmpButton, UPPER( SubStr( oTmpButton:Caption, AT('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+
+			oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+43, ' A&postas ' )
+//			oTmpButton:sBlock    := { || Apostas() }
+			oTmpButton:Style     := ''
+			oTmpButton:ColorSpec := SysPushButton()
+			AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+
+			oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+53, ' Ac&oes ' )
+//			oTmpButton:sBlock    := { || Acoes() }
+			oTmpButton:Style     := ''
+			oTmpButton:ColorSpec := SysPushButton()
+			AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+
+			oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+61, ' &Sair ' )
+			oTmpButton:sBlock    := { || lSair := pTRUE }
+			oTmpButton:Style     := ''
+			oTmpButton:ColorSpec := SysPushButton()
+			AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+
+			AEval( oBrowse:Cargo, { |xItem| xItem[1]:Display() } )
+			oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
+
+			while .not. lSair
+
+				// Destaca o registro selecionado no Browse 
+				oBrowse:colorRect( { oBrowse:rowPos, 1, oBrowse:rowPos, oBrowse:colCount}, { 1, 2})
+				oBrowse:forceStable()
+				oBrowse:colorRect( { oBrowse:rowPos, oBrowse:freeze + 1, oBrowse:rowPos, oBrowse:colCount}, { 8, 2})
+				oBrowse:hilite()
+
+				// Atualiza a barra de rolagem
+				oScrollBar:current := nCount * ( 100 / nMaxItens )
+				oScrollBar:update()
+
+				// Atualiza a grade com as dezenas dos jogos
+				If oHBItens:dbSeek( oHBCabec:CAB_CODIGO )
+					DispBegin()
+					oPartida:refreshAll()
+					oPartida:forceStable()
+					DispEnd()
+				EndIf
+
+				// Aguarda a acao do usuario
+				nKey := Inkey( (nRefresh / 1000), INKEY_ALL )
+
+				If oBrowse:stable .and. nKey > 0
+
+					nLastKeyType := hb_MilliSeconds()
+					nRefresh     := 1000					
+
+					do case
+						case ( nPointer := AScan( pBRW_INKEYS, { |xKey| xKey[ pBRW_KEY ] == nKey } ) ) > 0
+							Eval( pBRW_INKEYS[ nPointer ][ pBRW_ACTION ], oBrowse )
+
+						case ( nPointer := AScan( oBrowse:Cargo, { |xKey| xKey[ pBRW_ACTION ] == Upper( chr( nKey ) ) } ) ) > 0
+							If oBrowse:Cargo[ nMenuItem ][1]:HasFocus
+								oBrowse:Cargo[ nMenuItem ][1]:KillFocus()
+							EndIf
+							nMenuItem := nPointer
+							oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
+
+						case nKey == K_LEFT .or. nKey == K_LBUTTONDOWN
+							If oBrowse:Cargo[ nMenuItem ][1]:HasFocus
+								oBrowse:Cargo[ nMenuItem ][1]:KillFocus()
+							EndIf
+							If --nMenuItem < 1
+								nMenuItem := 1
+							EndIf
+							oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
+
+						case nKey == K_RIGHT .or. nKey == K_RBUTTONUP
+							If oBrowse:Cargo[ nMenuItem ][1]:HasFocus
+								oBrowse:Cargo[ nMenuItem ][1]:KillFocus()
+							EndIf
+							If ++nMenuItem > Len( oBrowse:Cargo )
+								nMenuItem := Len( oBrowse:Cargo )
+							EndIf
+							oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
+
+						case nKey == K_MWFORWARD
+							If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
+								oBrowse:up()
+							EndIf
+
+						case nKey == K_MWBACKWARD
+							If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
+								oBrowse:down()
+							EndIf	
+
+						case nKey == K_ENTER
+							oBrowse:Cargo[ nMenuItem ][1]:Select()
+							oBrowse:refreshAll()
+
+					endcase
+
+				Else
+					If ( nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 ) ) > 720
+						nRefresh := 60000 /* um minuto a cada 12 horas */
+					ElseIf nTmp > 60
+						nRefresh := 30000
+					ElseIf nTmp > 15
+						nRefresh := 10000
+					ElseIf nTmp > 1
+						nRefresh := 3000
+					ElseIf nTmp > 0
+						nRefresh := 2000
+					EndIf
+				EndIf
+
+			enddo
+
 		end sequence
 
-	EndIf
+	always
+		// Fecha o Objeto Windows
+		oWindow:Close()
+		// Restaura a tabela da Pilha
+		DstkPop()
+	end sequence
 
 return
 
@@ -2843,7 +3212,7 @@ local cInicio
 local cFinal
 local nCurrent
 local nTotConcurso := 0
-local bFiltro      := { || CONCURSO->CON_JOGO == pLOTECA .and. CONCURSO->( .not. Eof() ) }
+local bFiltro      := { || CONCURSO->CON_JOGO == pLOTECA .and. .not. CONCURSO->( Eof() ) }
 local oBarProgress
 local oPDFReport
 local nLinha
@@ -2856,7 +3225,7 @@ local nLinha
 
 		// Totaliza a quantidade de registro cadastrados
 		CONCURSO->( dbEval( { || nTotConcurso++ }, bFiltro ) )
-		if nTotConcurso >= 1
+		If nTotConcurso >= 1
 
 			cInicio	:= StrZero( 1, 5 )
 			cFinal  := StrZero( nTotConcurso, 5 )
@@ -2870,7 +3239,7 @@ local nLinha
 			oWindow:cHeader := ' Impressao Resultados '
 			oWindow:Open()
 
-			WHILE lContinua
+			while lContinua
 
 				@ oWindow:nBottom- 3, oWindow:nLeft+ 10 GET     cInicio                                        ;
 														PICT    '@K! 99999'                                    ;
@@ -2907,13 +3276,13 @@ local nLinha
 
 				Set( _SET_CURSOR, SC_NONE )
 
-				IF lContinua .and. LastKey() != K_ESC
+				If lContinua .and. LastKey() != K_ESC
 
 					dbSelectArea('CONCURSO')
-					IF CONCURSO->( dbSetOrder(1), dbSeek( pLOTECA + cInicio ) ) .and. ;
+					If CONCURSO->( dbSetOrder(1), dbSeek( pLOTECA + cInicio ) ) .and. ;
 						CONCURSO->( dbSetOrder(1), dbSeek( pLOTECA + cFinal ) )
 
-						bFiltro := { || CONCURSO->CON_JOGO == pLOTECA .and. CONCURSO->( .not. Eof() ) .and. ;
+						bFiltro := { || CONCURSO->CON_JOGO == pLOTECA .and. .not. CONCURSO->( Eof() ) .and. ;
 										CONCURSO->CON_CONCUR >= cInicio .and. CONCURSO->CON_CONCUR  <= cFinal }
 
 						// Totaliza a quantidade de registro cadastrados
@@ -2989,7 +3358,7 @@ local nLinha
 
 								enddo
 
-							endif
+							EndIf
 
 						always
 							oPDFReport:end()
@@ -3008,13 +3377,13 @@ local nLinha
 
 					EndIf
 
-				endif
+				EndIf
 
 			enddo
 
-		else
+		Else
 			ErrorTable( '207' )  // Nao existem informacoes a serem impressas.
-		endif
+		EndIf
 
 	always
 		// Fecha o Objeto Windows
@@ -3028,29 +3397,29 @@ return
 
 STATIC FUNCTION ArraySplit( arrayIn, nChunksReq )
 
-	LOCAL arrayOut
-	LOCAL nChunkSize
-	LOCAL nChunkPos
-	LOCAL item
+	local arrayOut
+	local nChunkSize
+	local nChunkPos
+	local item
  
-	IF nChunksReq > 0
+	If nChunksReq > 0
  
 	   arrayOut := {}
 	   nChunkSize := Max( Round( Len( arrayIn ) / nChunksReq, 0 ), 1 )
 	   nChunkPos := 0
  
-	   FOR EACH item IN arrayIn
-		  IF nChunkPos == 0
+	   for each item in arrayIn
+		  If nChunkPos == 0
 			 AAdd( arrayOut, {} )
-		  ENDIF
+			EndIf
 		  AAdd( ATail( arrayOut ), item )
-		  IF ++nChunkPos == nChunkSize .AND. Len( arrayOut ) < nChunksReq
+		  If ++nChunkPos == nChunkSize .and. Len( arrayOut ) < nChunksReq
 			 nChunkPos := 0
-		  ENDIF
-	   NEXT
-	ELSE
+		  EndIf
+		next
+	Else
 	   arrayOut := { arrayIn }
-	ENDIF
+	EndIf
  
-	RETURN arrayOut
+return arrayOut
  
