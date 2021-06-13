@@ -77,7 +77,7 @@
 #xtranslate SI_FIELDCHECKBOX  => aOdinSystem\[44\]
 #xtranslate SI_BROWSE         => aOdinSystem\[45\]
 
-#xtranslate pInicializa       => ( aOdinSystem := ARRAY( 45 ) )
+#xtranslate pInicializa       => ( aOdinSystem := Array(45) )
 
 
 /***
@@ -111,6 +111,8 @@
 #DEFINE pSTRU_APOSTAS_INCLUIR     8
 #DEFINE pSTRU_APOSTAS_MODIFICAR   9
 #DEFINE pSTRU_APOSTAS_EXCLUIR    10
+#DEFINE pSTRU_APOSTAS_GRUPOS     11
+#DEFINE pSTRU_APOSTAS_APOSTA     12
 
 #DEFINE pSTRU_SYSTEM              { ;
                                     { 'DSA', 'DUPLASENA',   {   '01', '02', '03', '04', '05', '06', '07', '08', '09', '10',                  ;
@@ -126,9 +128,11 @@
                                                             },                                                                               ;
                                                                 { |xDez| xDez >= 16 .or. xDez == 0 },                                        ;
                                                                 { || DSAMntBrowse()   },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
+                                                                { || MntAposta()      },                                                     ;
+                                                                { || ApoIncluir()     },                                                     ;
+                                                                { || ApoModificar()   },                                                     ;
+                                                                { || ApoExcluir()     },                                                     ;
+                                                                { || ApoGrupos()      },                                                     ;
                                                                 { || Nil              }                                                      ;
                                     },                                                                                                       ;
                                     { 'LTF', 'LOTOFACIL',   {   '01', '02', '03', '04', '05', '06', '07', '08', '09', '10',                  ;
@@ -143,10 +147,12 @@
                                                             },                                                                               ;
                                                                 { |xDez| xDez >= 11   },                                                     ;
                                                                 { || LTFMntBrowse()   },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              }                                                      ;
+                                                                { || MntAposta()      },                                                     ;
+                                                                { || ApoIncluir()     },                                                     ;
+                                                                { || ApoModificar()   },                                                     ;
+                                                                { || ApoExcluir()     },                                                     ;
+                                                                { || ApoGrupos()      },                                                     ;
+                                                                { || ApoApostas()     }                                                      ;
                                     },                                                                                                       ;
                                     { 'LTM', 'LOTOMANIA',   {   '01', '02', '03', '04', '05', '06', '07', '08', '09', '10',                  ;
                                                                 '11', '12', '13', '14', '15', '16', '17', '18', '19', '20',                  ;
@@ -169,9 +175,11 @@
                                                             },                                                                               ;
                                                                 { |xDez| xDez >= 16 .or. xDez == 0 },                                        ;
                                                                 { || LTMMntBrowse()   },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
+                                                                { || MntAposta()      },                                                     ;
+                                                                { || ApoIncluir()     },                                                     ;
+                                                                { || ApoModificar()   },                                                     ;
+                                                                { || ApoExcluir()     },                                                     ;
+                                                                { || ApoGrupos()      },                                                     ;
                                                                 { || Nil              }                                                      ;
                                     },                                                                                                       ;
                                     { 'MSA', 'MEGASENA',    {   '01', '02', '03', '04', '05', '06', '07', '08', '09', '10',                  ;
@@ -187,9 +195,11 @@
                                                             },                                                                               ;
                                                                 { |xDez| xDez >= 4    },                                                     ;
                                                                 { || MSAMntBrowse()   },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
+                                                                { || MntAposta()      },                                                     ;
+                                                                { || ApoIncluir()     },                                                     ;
+                                                                { || ApoModificar()   },                                                     ;
+                                                                { || ApoExcluir()     },                                                     ;
+                                                                { || ApoGrupos()      },                                                     ;
                                                                 { || Nil              }                                                      ;
                                     },                                                                                                       ;
                                     { 'QNA', 'QUINA',       {   '01', '02', '03', '04', '05', '06', '07', '08', '09', '10',                  ;
@@ -208,9 +218,11 @@
                                                             },                                                                               ;
                                                                 { |xDez| xDez >=  3   },                                                     ;
                                                                 { || QNAMntBrowse()   },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
+                                                                { || MntAposta()      },                                                     ;
+                                                                { || ApoIncluir()     },                                                     ;
+                                                                { || ApoModificar()   },                                                     ;
+                                                                { || ApoExcluir()     },                                                     ;
+                                                                { || ApoGrupos()      },                                                     ;
                                                                 { || Nil              }                                                      ;
                                     },                                                                                                       ;
                                     { 'TIM', 'TIMEMANIA',   {   '01', '02', '03', '04', '05', '06', '07', '08', '09', '10',                  ;
@@ -230,9 +242,11 @@
                                                             },                                                                               ;
                                                                 { |xDez| xDez >=  3 .or. xDez == 7 },                                        ;
                                                                 { || TIMMntBrowse()   },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
+                                                                { || MntAposta()      },                                                     ;
+                                                                { || ApoIncluir()     },                                                     ;
+                                                                { || ApoModificar()   },                                                     ;
+                                                                { || ApoExcluir()     },                                                     ;
+                                                                { || ApoGrupos()      },                                                     ;
                                                                 { || Nil              }                                                      ;
                                     },                                                                                                       ;
                                     { 'DDS', 'DIADESORTE',  {   '01', '02', '03', '04', '05', '06', '07', '08', '09', '10',                  ;
@@ -246,11 +260,13 @@
                                                                 { '04', { |xDta| xDta >= CToD('19/05/18') } }                                ;
                                                             },                                                                               ;
                                                                 { |xDez| Len(xDez) > 0 .and. (Len(xDez) >= 7 .or. Len(xDez) <= 15) },        ;
-                                                                { || DDSMntBrowse() },                                                       ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil },                                                                  ;
-                                                                { || Nil }                                                                   ;
+                                                                { || DDSMntBrowse()   },                                                     ;
+                                                                { || MntAposta()      },                                                     ;
+                                                                { || ApoIncluir()     },                                                     ;
+                                                                { || ApoModificar()   },                                                     ;
+                                                                { || ApoExcluir()     },                                                     ;
+                                                                { || ApoGrupos()      },                                                     ;
+                                                                { || Nil              }                                                      ;
                                     },                                                                                                       ;
                                     { 'LTC', ' LOTECA ',    { '00100', '01000', '10000'                                                      ; // , '01110', '11010', '10110', '11101' ;
                                                             },                                                                               ;
@@ -260,10 +276,12 @@
                                                             },                                                                               ;
                                                                 { |xDez| xDez >= 13   },                                                     ;
                                                                 { || LTCMntBrowse()   },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              }                                                      ;
+                                                                { || MntAposta()      },                                                     ;
+                                                                { || ApoIncluir()     },                                                     ;
+                                                                { || ApoModificar()   },                                                     ;
+                                                                { || ApoExcluir()     },                                                     ;
+                                                                { || ApoGrupos()      },                                                     ;
+                                                                { || LTCApostas()     }                                                      ;
                                     },                                                                                                       ;
                                     { 'LTG', 'LOTOGOL',     { ''                                                                             ;
                                                             },                                                                               ;
@@ -273,9 +291,11 @@
                                                             },                                                                               ;
                                                                 { |xDez| xDez >= 3    },                                                     ;
                                                                 { || LTGMntBrowse()   },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
-                                                                { || Nil              },                                                     ;
+                                                                { || MntAposta()      },                                                     ;
+                                                                { || ApoIncluir()     },                                                     ;
+                                                                { || ApoModificar()   },                                                     ;
+                                                                { || ApoExcluir()     },                                                     ;
+                                                                { || ApoGrupos()      },                                                     ;
                                                                 { || Nil              }                                                      ;
                                     } ;
                                 }
