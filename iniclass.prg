@@ -8,10 +8,10 @@
 *	Classes para Manipulacao de arquivos INI.
 *
 */
-#include "hbclass.ch"
-#include "fileio.ch"
-#include "common.ch"
-#include "main.ch"
+#include 'hbclass.ch'
+#include 'fileio.ch'
+#include 'common.ch'
+#include 'main.ch'
 
 /***
 *
@@ -67,7 +67,7 @@ END CLASS
 METHOD New( cNomeArquivo ) CLASS TIniFile
 
 local lDone     := pFALSE
-local cLine     := ""
+local cLine     := ''
 local hFile
 local cFile
 local cIdent
@@ -107,8 +107,8 @@ local xRetValue
                   If .not. Empty( cLine )
 
                      // Nova Secao
-                     If Left( cLine, 1 ) == "["
-                        If ( nPos := At( "]", cLine ) ) > 1
+                     If Left( cLine, 1 ) == '['
+                        If ( nPos := At( ']', cLine ) ) > 1
                            cLine := SubStr( cLine, 2, nPos - 2 )
                         Else
                            cLine := SubStr( cLine, 2 )
@@ -118,29 +118,29 @@ local xRetValue
                         CurrArray := ::aContents[ Len( ::aContents ) ][2]
 
                      // Preserva Comentarios no arquivo
-                     ElseIF Left( cLine, 1 ) == ";"
+                     ElseIf Left( cLine, 1 ) == ';'
                         AAdd( CurrArray, { NIL, cLine } )
 
                      Else
-                        If ( nPos := At( "=", cLine ) ) > 0
+                        If ( nPos := At( '=', cLine ) ) > 0
                            cIdent := Left( cLine, nPos - 1 )
                            cLine  := SubStr( cLine, nPos + 1 )
 
                            AAdd( CurrArray, { cIdent, cLine } )
 
                         Else
-                           AAdd( CurrArray, { cLine, "" } )
+                           AAdd( CurrArray, { cLine, '' } )
                         EndIf
                      EndIf
 
                      // Prepara para acrescentar mais tarde
-                     cLine := ""
+                     cLine := ''
 
                   EndIf
 
                Else
                   cLine := cFile
-                  cFile := ""
+                  cFile := ''
                EndIf
             enddo
          enddo
@@ -150,9 +150,9 @@ local xRetValue
          xRetValue := QSelf()
       end sequence
 
-   else
+   Else
       // Gera o erro ?
-      hb_gtAlert( "Nenhum arquivo foi passado para TIniFile():New()", { "Ok" }, "W+/R", "W+/B" )
+      hb_gtAlert( 'Nenhum arquivo foi passado para TIniFile():New()', { 'Ok' }, 'W+/R', 'W+/B' )
    EndIf
 
 return xRetValue
@@ -197,9 +197,9 @@ local nCount
 local cFind
 
    If Empty( cIdent )
-      hb_gtAlert( "Deve especificar um identificador", { "Ok" }, "W+/R", "W+/B" )
+      hb_gtAlert( 'Deve especificar um identificador', { 'Ok' }, 'W+/R', 'W+/B' )
 
-   ElseIF Empty( cSection )
+   ElseIf Empty( cSection )
       cFind := Lower( cIdent )
 
       If ( nPointer := AScan( ::aContents, ;
@@ -252,11 +252,11 @@ return
 
 
 METHOD ReadBool( cSection, cIdent, lDefault ) CLASS TIniFile
-   return ::ReadString( cSection, cIdent, iif( lDefault, ".T.", ".F." ) ) == ".T."
+   return ::ReadString( cSection, cIdent, iif( lDefault, '.T.', '.F.' ) ) == '.T.'
 
 
 METHOD PROCEDURE WriteBool( cSection, cIdent, lBool ) CLASS TIniFile
-   ::WriteString( cSection, cIdent, iif( lBool, ".T.", ".F." ) )
+   ::WriteString( cSection, cIdent, iif( lBool, '.T.', '.F.' ) )
 return
 
 
@@ -358,21 +358,21 @@ local nCount
          If HB_ISNIL( ::aContents[ nPos ][1] )
             FWrite( hFile, ::aContents[ nPos ][2] + hb_eol() )
 
-         ElseIF HB_ISARRAY( ::aContents[ nPos ][2] )
-            FWrite( hFile, "[" + ::aContents[ nPos ][1] + "]" + hb_eol() )
+         ElseIf HB_ISARRAY( ::aContents[ nPos ][2] )
+            FWrite( hFile, '[' + ::aContents[ nPos ][1] + ']' + hb_eol() )
 
             for nCount := 1 to Len( ::aContents[ nPos ][2] )
                If HB_ISNIL( ::aContents[ nPos ][ 2 ][ nCount ][1] )
                   FWrite( hFile, ::aContents[ nPos ][2][ nCount ][2] + hb_eol() )
                Else
-                  FWrite( hFile, ::aContents[ nPos ][2][ nCount ][1] + "=" + ::aContents[ nPos ][2][ nCount ][2] + hb_eol() )
+                  FWrite( hFile, ::aContents[ nPos ][2][ nCount ][1] + '=' + ::aContents[ nPos ][2][ nCount ][2] + hb_eol() )
                EndIf
             next
 
             FWrite( hFile, hb_eol() )
 
-         ElseIF HB_ISSTRING( ::aContents[ nPos ][2] )
-            FWrite( hFile, ::aContents[ nPos ][1] + "=" + ::aContents[ nPos ][2] + hb_eol() )
+         ElseIf HB_ISSTRING( ::aContents[ nPos ][2] )
+            FWrite( hFile, ::aContents[ nPos ][1] + '=' + ::aContents[ nPos ][2] + hb_eol() )
 
          EndIf
       next
