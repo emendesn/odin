@@ -43,7 +43,7 @@ local nLastKeyType  := hb_MilliSeconds()
 local nRefresh      := 1000              /* um segundo como defaul */
 local nCount        := 0
 local nMenuItem     := 1
-local nMaxItens     := 1
+local nMaxItens     := 0
 local lSair         := pFALSE
 local oWindow
 local bFiltro
@@ -76,7 +76,7 @@ local nGrade
 						If nPosDezenas <= Len( pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ] )
 							aDezenas[ nLinDezenas ][ nColDezenas ] := pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ][ nPosDezenas ]
 						Else
-							aDezenas[ nLinDezenas ][ nColDezenas ] := '  '
+							aDezenas[ nLinDezenas ][ nColDezenas ] := Space(2)
 						EndIf
 						nPosDezenas++
 					next
@@ -96,7 +96,7 @@ local nGrade
 							oWindow:nBottom- 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
 
 				// Estabelece o Filtro para exibicao dos registros
-				bFiltro := { || CONCURSO->CON_JOGO == pDIA_SORTE .and. CONCURSO->( .not. Eof() ) }
+				bFiltro := { || CONCURSO->CON_JOGO == pDIA_SORTE .and. .not. CONCURSO->( Eof() ) }
 
 				dbSelectArea('CONCURSO')
 				CONCURSO->( dbEval( {|| nMaxItens++ }, bFiltro ) )
@@ -223,7 +223,7 @@ local nGrade
 					oTmpButton:sBlock    := { || DDSAcoes() }
 					oTmpButton:Style     := ''
 					oTmpButton:ColorSpec := SysPushButton()
-					AADD( oBrowse:Cargo, { oTmpButton, UPPER( SUBSTR( oTmpButton:Caption, AT('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+					AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
 
 					oTmpButton           := PushButton( oWindow:nBottom- 1, oWindow:nLeft+42, ' &Sair ' )
 					oTmpButton:sBlock    := { || lSair := pTRUE }
@@ -292,13 +292,13 @@ local nGrade
 									oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
 
 								case nKey == K_MWFORWARD
-									if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+									If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 										Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 										oBrowse:up()
 									EndIf
 
 								case nKey == K_MWBACKWARD
-									if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+									If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 										Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 										oBrowse:down()
 									EndIf	
@@ -309,20 +309,19 @@ local nGrade
 
                             endcase
 
-						else
-							nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 )
-							if nTmp > 720
+						Else
+							If ( nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 ) ) > 720
 								nRefresh := 60000 /* um minuto a cada 12 horas */
-							elseif nTmp > 60
+							ElseIf nTmp > 60
 								nRefresh := 30000
-							elseif nTmp > 15
+							ElseIf nTmp > 15
 								nRefresh := 10000
-							elseif nTmp > 1
+							ElseIf nTmp > 1
 								nRefresh := 3000
-							elseif nTmp > 0
+							ElseIf nTmp > 0
 								nRefresh := 2000
-							endif
-						endif
+							EndIf
+						EndIf
 
 					enddo
 
@@ -390,20 +389,20 @@ If SystemConcurso() == pDIA_SORTE
 				//
 				If ( cAutoSequence := oIniFile:ReadString( 'DIASORTE', 'AUTO_SEQUENCE', '0' ) ) == '1'
 					// Define o codigo sequencial
-					dbEval( { || nCodigo++ }, { || CONCURSO->CON_JOGO == pDIA_SORTE .and. CONCURSO->( .not. Eof() ) } )
+					dbEval( { || nCodigo++ }, { || CONCURSO->CON_JOGO == pDIA_SORTE .and. .not. CONCURSO->( Eof() ) } )
 					pDDS_CONCURSO := StrZero( nCodigo, 5 )
 				EndIf
 				
 				
 				// Cria o Objeto Windows
 				oWindow        := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
-				oWindow:nTop    := INT( SystemMaxRow() / 2 ) -  7
-				oWindow:nLeft   := INT( SystemMaxCol() / 2 ) - 21
-				oWindow:nBottom := INT( SystemMaxRow() / 2 ) +  7
-				oWindow:nRight  := INT( SystemMaxCol() / 2 ) + 21
+				oWindow:nTop    := Int( SystemMaxRow() / 2 ) -  7
+				oWindow:nLeft   := Int( SystemMaxCol() / 2 ) - 21
+				oWindow:nBottom := Int( SystemMaxRow() / 2 ) +  7
+				oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 21
 				oWindow:Open()
 				
-				WHILE lContinua
+				while lContinua
 					
 					@ oWindow:nTop+ 1, oWindow:nLeft+14 GET     pDDS_CONCURSO                                  ;
 														PICT    '@K 99999'                                     ;
@@ -707,14 +706,14 @@ memvar xCount, xTemp
 				
 				// Cria o Objeto Windows
 				oWindow         := WindowsNew():New( ,,,, B_SINGLE + ' ', SystemFormColor() )
-				oWindow:nTop    := INT( SystemMaxRow() / 2 ) -  8
-				oWindow:nLeft   := INT( SystemMaxCol() / 2 ) - 21
-				oWindow:nBottom := INT( SystemMaxRow() / 2 ) +  9
-				oWindow:nRight  := INT( SystemMaxCol() / 2 ) + 21
+				oWindow:nTop    := Int( SystemMaxRow() / 2 ) -  8
+				oWindow:nLeft   := Int( SystemMaxCol() / 2 ) - 21
+				oWindow:nBottom := Int( SystemMaxRow() / 2 ) +  9
+				oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 21
 				oWindow:Open()
 				
 				
-				WHILE lContinua
+				while lContinua
 					
 					@ oWindow:nTop+ 1, oWindow:nLeft+14 GET     pDDS_CONCURSO                                  ;
 														PICT    '@!'                                           ;
@@ -1419,7 +1418,7 @@ local nLastKeyType  := hb_MilliSeconds()
 local nRefresh      := 1000              /* um segundo como defaul */
 local nCount        := 0
 local nMenuItem     := 1
-local nMaxItens     := 1
+local nMaxItens     := 0
 local lSair         := pFALSE
 
 
@@ -1453,7 +1452,7 @@ local nPercComb
 			oWindow:Open()
 
 			hb_DispBox( oWindow:Bottom- 2, oWindow:Left+ 1, ;
-						oWindow:Bottom- 2, oWindow:Right- 1, B_SINGLE, SystemFormColor() )
+						oWindow:Bottom- 2, oWindow:Right- 1, oWindow:cBorder )
 
 
 			// nPercComb := hb_idleAdd( {||  hb_DispOutAt( oWindow:nTop+ 2, oWindow:nLeft+ 1,    ;
@@ -1497,12 +1496,12 @@ local nPercComb
 				oTmpButton:sBlock    := { || lSair := pTRUE }
 				oTmpButton:Style     := ''
 				oTmpButton:ColorSpec := SysPushButton()
-				AADD( oBrowse:Cargo, { oTmpButton, UPPER( SUBSTR( oTmpButton:caption, AT('&', oTmpButton:caption )+ 1, 1 ) ) } )
+				AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:caption, At('&', oTmpButton:caption )+ 1, 1 ) ) } )
 			
 				AEval( oBrowse:Cargo, { |xItem| xItem[1]:Display() } )
 				oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
 			
-				WHILE .NOT. lSair
+				while .not. lSair
 
 					oBrowse:forceStable()
 						
@@ -1543,13 +1542,13 @@ local nPercComb
 								oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
 
 							case nKey == K_MWFORWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 									oBrowse:up()
 								EndIf
 
 							case nKey == K_MWBACKWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 									oBrowse:down()
 								EndIf	
@@ -1560,20 +1559,19 @@ local nPercComb
 
 						endcase
 						
-					else
-						nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 )
-						if nTmp > 720
+					Else
+						If ( nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 ) ) > 720
 							nRefresh := 60000 /* um minuto a cada 12 horas */
-						elseif nTmp > 60
+						ElseIf nTmp > 60
 							nRefresh := 30000
-						elseif nTmp > 15
+						ElseIf nTmp > 15
 							nRefresh := 10000
-						elseif nTmp > 1
+						ElseIf nTmp > 1
 							nRefresh := 3000
-						elseif nTmp > 0
+						ElseIf nTmp > 0
 							nRefresh := 2000
-						endif
-					endif
+						EndIf
+					EndIf
 				
 				enddo
 
@@ -1616,7 +1614,7 @@ local nMenuItem   := 1
 local nMaxItens   := 0
 local lSair       := pFALSE
 local oWindow
-local bFiltro     := { || TMP->( .not. Eof() ) }
+local bFiltro     := { || .not. TMP->( Eof() ) }
 
 local oSequen1
 local oSequen2
@@ -1696,7 +1694,7 @@ local nGrade
 				oSequen1               	:= 	TBrowseNew( ( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) + 1 ), oWindow:nLeft+ 1, ;
 														( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) - 3 ), oWindow:nRight- 1 )
 				oSequen1:skipBlock     	:= 	{ |x,k| ;
-												k := iif( Abs(x) >= IIF( x >= 0,                          ;
+												k := iif( Abs(x) >= iif( x >= 0,                          ;
 																	Len( aDezenas ) - nRow, nRow - 1),    ;
 														iif(x >= 0, Len( aDezenas ) - nRow,1 - nRow), x ) ;
 														, nRow += k, k                                    ;
@@ -1908,13 +1906,13 @@ local nGrade
 								oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
 
 							case nKey == K_MWFORWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 									oBrowse:up()
 								EndIf
 
 							case nKey == K_MWBACKWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 									oBrowse:down()
 								EndIf	
@@ -1963,7 +1961,7 @@ local cInicio
 local cFinal
 local nCurrent
 local nTotConcurso := 0
-local bFiltro      := { || CONCURSO->CON_JOGO == pDIA_SORTE .and. CONCURSO->( .not. Eof() ) }
+local bFiltro      := { || CONCURSO->CON_JOGO == pDIA_SORTE .and. .not. CONCURSO->( Eof() ) }
 local oBarProgress
 local oPDFReport
 local nLinha
@@ -1976,7 +1974,7 @@ local nLinha
 
 		// Totaliza a quantidade de registro cadastrados
 		CONCURSO->( dbEval( { || nTotConcurso++ }, bFiltro ) )
-		if nTotConcurso >= 1
+		If nTotConcurso >= 1
 
 			cInicio	:= StrZero( 1, 5 )
 			cFinal  := StrZero( nTotConcurso, 5 )
@@ -1990,7 +1988,7 @@ local nLinha
 			oWindow:cHeader := ' Impressao Resultados '
 			oWindow:Open()
 
-			WHILE lContinua
+			while lContinua
 
 				@ oWindow:nBottom- 3, oWindow:nLeft+ 10 GET     cInicio                                        ;
 														PICT    '@K! 99999'                                    ;
@@ -2027,13 +2025,13 @@ local nLinha
 
 				Set( _SET_CURSOR, SC_NONE )
 
-				IF lContinua .and. LastKey() != K_ESC
+				If lContinua .and. LastKey() != K_ESC
 
 					dbSelectArea('CONCURSO')
-					IF CONCURSO->( dbSetOrder(1), dbSeek( pDIA_SORTE + cInicio ) ) .and. ;
+					If CONCURSO->( dbSetOrder(1), dbSeek( pDIA_SORTE + cInicio ) ) .and. ;
 						CONCURSO->( dbSetOrder(1), dbSeek( pDIA_SORTE + cFinal ) )
 
-						bFiltro := { || CONCURSO->CON_JOGO == pDIA_SORTE .and. CONCURSO->( .not. Eof() ) .and. ;
+						bFiltro := { || CONCURSO->CON_JOGO == pDIA_SORTE .and. .not. CONCURSO->( Eof() ) .and. ;
 										CONCURSO->CON_CONCUR >= cInicio .and. CONCURSO->CON_CONCUR  <= cFinal }
 
 						// Totaliza a quantidade de registro cadastrados
@@ -2109,7 +2107,7 @@ local nLinha
 
 								enddo
 
-							endif
+							EndIf
 
 						always
 							oPDFReport:end()
@@ -2128,13 +2126,13 @@ local nLinha
 
 					EndIf
 
-				endif
+				EndIf
 
 			enddo
 
-		else
+		Else
 			ErrorTable( '207' )  // Nao existem informacoes a serem impressas.
-		endif
+		EndIf
 
 	always
 		// Fecha o Objeto Windows
@@ -2148,29 +2146,29 @@ return
 
 STATIC FUNCTION ArraySplit( arrayIn, nChunksReq )
 
-	LOCAL arrayOut
-	LOCAL nChunkSize
-	LOCAL nChunkPos
-	LOCAL item
+	local arrayOut
+	local nChunkSize
+	local nChunkPos
+	local item
  
-	IF nChunksReq > 0
+	If nChunksReq > 0
  
 	   arrayOut := {}
 	   nChunkSize := Max( Round( Len( arrayIn ) / nChunksReq, 0 ), 1 )
 	   nChunkPos := 0
  
-	   FOR EACH item IN arrayIn
-		  IF nChunkPos == 0
+	   for each item in arrayIn
+		  	If nChunkPos == 0
 			 AAdd( arrayOut, {} )
-		  ENDIF
+			EndIf
 		  AAdd( ATail( arrayOut ), item )
-		  IF ++nChunkPos == nChunkSize .AND. Len( arrayOut ) < nChunksReq
+		  	If ++nChunkPos == nChunkSize .and. Len( arrayOut ) < nChunksReq
 			 nChunkPos := 0
-		  ENDIF
-	   NEXT
-	ELSE
+			EndIf
+		next
+	Else
 	   arrayOut := { arrayIn }
-	ENDIF
+	EndIf
  
-	RETURN arrayOut
+return arrayOut
  
