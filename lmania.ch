@@ -97,7 +97,7 @@
 // Inicializa as Variaveis no vetor
 #XTRANSLATE xStoreLotoMania                             => (    pLTM_CONCURSO     := Space(5),                                        ;
                                                                 pLTM_SORTEIO      := CToD(''),                                        ;
-                                                                AFill( aLotoMania\[ pLTM_POS_DADOS ]\[ pLTM_POS_DEZENAS ], SPACE(2) ),;
+                                                                AFill( aLotoMania\[ pLTM_POS_DADOS ]\[ pLTM_POS_DEZENAS ], Space(2) ),;
                                                                 AFill( aLotoMania\[ pLTM_POS_DADOS ]\[ pLTM_POS_ACER_00 ], 0 ),       ;
                                                                 AFill( aLotoMania\[ pLTM_POS_DADOS ]\[ pLTM_POS_ACER_15 ], 0 ),       ;
                                                                 AFill( aLotoMania\[ pLTM_POS_DADOS ]\[ pLTM_POS_ACER_16 ], 0 ),       ;
@@ -148,8 +148,8 @@
 #XTRANSLATE xLMInitAleatoria                  => ( aLMania := { , , , , } )
 
 // Inicializa as Variaveis no vetor
-#XTRANSLATE xLMStoreAleatoria                 => ( LM_AL_APOSTA       := SPACE(4),  ;
-                                                   LM_AL_SORTEIO      := CTOD(''),  ;
+#XTRANSLATE xLMStoreAleatoria                 => ( LM_AL_APOSTA       := Space(4),  ;
+                                                   LM_AL_SORTEIO      := CToD(''),  ;
                                                    LM_AL_VALOR_APOSTA :=  0,        ;
                                                    LM_AL_QUANTIDADE   :=  1,        ;
                                                    LM_AL_DEZENAS      := 50         )
@@ -176,10 +176,10 @@
 #XTRANSLATE xLMInitAnaliseDezenas             => ( aLMania := { , , , , , } )
 
 // Inicializa as Variaveis no vetor
-#XTRANSLATE xLMStoreAnaliseDezenas            => ( LM_AD_APOSTA       := SPACE(4),  ;
-                                                   LM_AD_SORTEIO      := CTOD(''),  ;
+#XTRANSLATE xLMStoreAnaliseDezenas            => ( LM_AD_APOSTA       := Space(4),  ;
+                                                   LM_AD_SORTEIO      := CToD(''),  ;
                                                    LM_AD_VALOR_APOSTA :=  0,        ;
-                                                   LM_AD_OPCAO        := "E",       ;
+                                                   LM_AD_OPCAO        := 'E',       ;
                                                    LM_AD_DEZENAS      := 50,        ;
                                                    LM_AD_QUANTIDADE   := 51         )
 
@@ -206,10 +206,10 @@
 #XTRANSLATE xLMInitDefinicaoDezenas           => ( aLMania := { , , , , } )
 
 // Inicializa as Variaveis no vetor
-#XTRANSLATE xLMStoreDefinicaoDezenas          => ( LM_DF_APOSTA       := SPACE(4),  ;
-                                                   LM_DF_SORTEIO      := CTOD(''),  ;
+#XTRANSLATE xLMStoreDefinicaoDezenas          => ( LM_DF_APOSTA       := Space(4),  ;
+                                                   LM_DF_SORTEIO      := CToD(''),  ;
                                                    LM_DF_VALOR_APOSTA :=  0,        ;
-                                                   LM_DF_DISPLAY      := "",        ;
+                                                   LM_DF_DISPLAY      := '',        ;
                                                    LM_DF_DEZENAS      := 50         )
 
 
