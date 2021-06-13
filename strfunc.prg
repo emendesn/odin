@@ -9,7 +9,7 @@
 *
 ***/
 
-#include "common.ch"
+#include 'common.ch'
 
 /***
 *
@@ -25,7 +25,7 @@
 FUNCTION ParseDezenas( cString )
 
 local aRetValue  := {}
-local cTmpString := ""
+local cTmpString := ''
 local nCount     := 0
 
 	If Len( cString ) > 0
@@ -35,7 +35,7 @@ local nCount     := 0
 				cTmpString += SubStr( AllTrim( cString ), nCount, 1 )
 			Else
 				AAdd( aRetValue, cTmpString )
-				cTmpString := ""
+				cTmpString := ''
 			EndIf
 		enddo
 		
@@ -57,13 +57,13 @@ return( aRetValue )
 */
 FUNCTION ParseString( aArray )
 
-local cRetValue := ""
+local cRetValue := ''
 local nCount    := 0
 
 	If ValType( aArray ) == 'A' .and. Len( aArray ) > 0
 		for nCount := 1 to Len( aArray )
 			cRetValue += aArray[ nCount ]
-			cRetValue += iif( Len( aArray ) > nCount, "-", "" )
+			cRetValue += iif( Len( aArray ) > nCount, '-', '' )
 		next
 	EndIf
 
@@ -85,7 +85,7 @@ return( cRetValue )
 FUNCTION StrDezenas( cString )
 
 local aString   := {}
-local cRetValue := ""
+local cRetValue := ''
 local nPos      := 0
 
 	If Len( cString ) > 0
@@ -97,7 +97,7 @@ local nPos      := 0
 			while nPos++ < Len( aString )
 				cRetValue += aString[ nPos ]
 				If nPos < Len( aString )
-					cRetValue += "-"
+					cRetValue += '-'
 				EndIf
 			enddo
 
