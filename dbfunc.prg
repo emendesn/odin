@@ -9,11 +9,11 @@
 *
 ***/
 
-#include "set.ch"
-#include "common.ch"
-#include "assert.ch"
-#include "dbfunc.ch"
-#include "main.ch"
+#include 'set.ch'
+#include 'common.ch'
+#include 'assert.ch'
+#include 'dbfunc.ch'
+#include 'main.ch'
 
 
 /***
@@ -32,15 +32,15 @@ PROCEDURE DstkPush( lPopPush )
 #DEFINE pLEN_DBF_STK_ENTRY 11
 
 // Variavel de caracteres usada como pilha de Banco de Dados
-static cDbfStk := ""
+static cDbfStk := ''
 
 	DEFAULT lPopPush TO pFALSE
 
 	If lPopPush
 
 		If Len( cDbfStk ) > 0
-			Set( _SET_SOFTSEEK, SubStr( cDbfStk, 10, 1) == "T")
-			set( _SET_DELETED,  SubStr( cDbfStk, 11, 1) == "T")
+			Set( _SET_SOFTSEEK, SubStr( cDbfStk, 10, 1) == 'T')
+			set( _SET_DELETED,  SubStr( cDbfStk, 11, 1) == 'T')
 
 			Select Asc( SubStr( cDbfStk, 1, 1 ) )
 			dbGoto( Val( SubStr( cDbfStk, 2, 7 ) ) )
@@ -53,8 +53,8 @@ static cDbfStk := ""
 
 		cDbfStk := Chr( Select() ) + Str( RecNo(), 7)     ;
                         + Chr( IndexOrd() )                    ;
-                        + iif( Set( _SET_SOFTSEEK ), "T", "F") ;
-                        + iif( Set( _SET_DELETED ), "T", "F") + cDbfStk
+                        + iif( Set( _SET_SOFTSEEK ), 'T', 'F') ;
+                        + iif( Set( _SET_DELETED ), 'T', 'F') + cDbfStk
 	EndIf
 
 return
@@ -87,7 +87,7 @@ local nRetValue := 0
 
 	If nSkip == 0
 		dbSkip(0)
-	ElseIF nSkip > 0 .and. .not. Eof()
+	ElseIf nSkip > 0 .and. .not. Eof()
 		while nRetValue < nSkip
 			dbSkip()
 			If .not. Eval( bCondicao ) .or. Eof()
@@ -96,7 +96,7 @@ local nRetValue := 0
 			EndIf
 			nRetValue++
 		enddo
-	ElseIF nSkip < 0
+	ElseIf nSkip < 0
 		while nRetValue > nSkip
 			dbSkip(-1)
 			If Bof()
