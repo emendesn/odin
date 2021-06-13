@@ -8,9 +8,9 @@
 *	Classes para Manipulacao da Barra de Progresso.
 *
 */
-#include "hbclass.ch"
-#include "common.ch"
-#include "box.ch"
+#include 'hbclass.ch'
+#include 'common.ch'
+#include 'box.ch'
 
 /***
 *
@@ -71,10 +71,10 @@ END CLASS
 */
 METHOD New( nTop, nLeft, cHeader, cFooter, cBorder, cColor ) CLASS ProgressBar
 	
-	::nTop    := iif( .not. HB_ISNIL( nTop ) .and.  nTop < MaxRow()- 5,    nTop,  INT( ( MaxRow()- 4)/2 ) )
-	::nLeft   := iif( .not. HB_ISNIL( nLeft ) .and. nLeft < MaxCol()-55,   nLeft, INT( ( MaxCol()-54)/2 ) )
-	::cHeader := iif( .not. HB_ISNIL( cHeader ), cHeader, "> Percentual Completo <" )
-	::cFooter := iif( .not. HB_ISNIL( cFooter ), cFooter, "> Aguarde... <" )
+	::nTop    := iif( .not. HB_ISNIL( nTop ) .and.  nTop < MaxRow()- 5,    nTop,  Int( ( MaxRow()- 4)/2 ) )
+	::nLeft   := iif( .not. HB_ISNIL( nLeft ) .and. nLeft < MaxCol()-55,   nLeft, Int( ( MaxCol()-54)/2 ) )
+	::cHeader := iif( .not. HB_ISNIL( cHeader ), cHeader, '> Percentual Completo <' )
+	::cFooter := iif( .not. HB_ISNIL( cFooter ), cFooter, '> Aguarde... <' )
 	::cBorder := iif( .not. HB_ISNIL( cBorder ), cBorder,  B_SINGLE )
 	::cColor  := iif( .not. HB_ISNIL( cColor ),  cColor,  Set( _SET_COLOR ) )
 		
@@ -135,10 +135,10 @@ local nCol := Col()
 	EndIf
 	
 	// Exibe o Percentual
-	@ ::nTop+ 1, ::nLeft+25 SAY Str( nDone, 3) + "%" COLOR ::cColor
+	@ ::nTop+ 1, ::nLeft+25 SAY Str( nDone, 3) + '%' COLOR ::cColor
 	
 	// show progress bar
-	@ ::nTop+ 2, ::nLeft+ 2 SAY PadR( Replicate( Chr(219), ( (nDone*.51)+.5) ), 51, ".") COLOR ::cColor
+	@ ::nTop+ 2, ::nLeft+ 2 SAY PadR( Replicate( Chr(219), ( (nDone*.51)+.5) ), 51, '.') COLOR ::cColor
 	
 	SetPos( nRow, nCol)
 	
