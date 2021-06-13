@@ -42,7 +42,7 @@ local nLastKeyType  := hb_MilliSeconds()
 local nRefresh      := 1000              /* um segundo como defaul */
 local nCount        := 0
 local nMenuItem     := 1
-local nMaxItens     := 1
+local nMaxItens     := 0
 local lSair         := pFALSE
 local oWindow
 local bFiltro
@@ -97,7 +97,7 @@ local nGrade
 							oWindow:nBottom- 2, oWindow:nRight- 1, oWindow:cBorder, SystemFormColor() )
 
 				// Estabelece o Filtro para exibicao dos registros
-				bFiltro := { || CONCURSO->CON_JOGO == pDUPLA_SENA .and. CONCURSO->( .not. Eof() ) }
+				bFiltro := { || CONCURSO->CON_JOGO == pDUPLA_SENA .and. .not. CONCURSO->( Eof() ) }
 
 				dbSelectArea('CONCURSO')
 				CONCURSO->( dbEval( {|| nMaxItens++ }, bFiltro ) )
@@ -293,7 +293,7 @@ local nGrade
 					oTmpButton:sBlock    	:= { || DSAAcoes() }
 					oTmpButton:Style     	:= ''
 					oTmpButton:ColorSpec 	:= SysPushButton()
-					AADD( oBrowse:Cargo, { oTmpButton, UPPER( SUBSTR( oTmpButton:Caption, AT('&', oTmpButton:Caption )+ 1, 1 ) ) } )
+					AAdd( oBrowse:Cargo, { oTmpButton, Upper( SubStr( oTmpButton:Caption, At('&', oTmpButton:Caption )+ 1, 1 ) ) } )
 
 					oTmpButton           	:= PushButton( oWindow:nBottom- 1, oWindow:nLeft+42, ' &Sair ' )
 					oTmpButton:sBlock    	:= { || lSair := pTRUE }
@@ -370,13 +370,13 @@ local nGrade
 									oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
 
 								case nKey == K_MWFORWARD
-									if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+									If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 										Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 										oBrowse:up()
 									EndIf
 
 								case nKey == K_MWBACKWARD
-									if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+									If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 										Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 										oBrowse:down()
 									EndIf
@@ -387,20 +387,19 @@ local nGrade
 
 							endcase
 
-						else
-							nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 )
-							if nTmp > 720
+						Else
+							If ( nTmp := Int( ( ( hb_MilliSeconds() - nLastKeyType ) / 1000 ) / 60 ) ) > 720
 								nRefresh := 60000 /* um minuto a cada 12 horas */
-							elseif nTmp > 60
+							ElseIf nTmp > 60
 								nRefresh := 30000
-							elseif nTmp > 15
+							ElseIf nTmp > 15
 								nRefresh := 10000
-							elseif nTmp > 1
+							ElseIf nTmp > 1
 								nRefresh := 3000
-							elseif nTmp > 0
+							ElseIf nTmp > 0
 								nRefresh := 2000
-							endif
-						endif
+							EndIf
+						EndIf
 
 					enddo
 
@@ -475,7 +474,7 @@ memvar xCount, xTemp
 					//
 					// Codigo sequencial
 					//
-					dbEval( { || nCodigo++ }, { || CONCURSO->CON_JOGO == pDUPLA_SENA .and. CONCURSO->( .not. Eof() ) } )
+					dbEval( { || nCodigo++ }, { || CONCURSO->CON_JOGO == pDUPLA_SENA .and. .not. CONCURSO->( Eof() ) } )
 					pDSA_CONCURSO := StrZero( nCodigo, 5 )
 				EndIf
 
@@ -487,7 +486,7 @@ memvar xCount, xTemp
 				oWindow:nRight  := Int( SystemMaxCol() / 2 ) + 21
 				oWindow:Open()
 
-				WHILE lContinua
+				while lContinua
 
 					@ oWindow:nTop+ 1, oWindow:nLeft+14	GET     pDSA_CONCURSO                                  ;
 														PICT    '@K 99999'                                     ;
@@ -1880,7 +1879,7 @@ local aSequencia
 							TMP->TMP_SEQ2 := ParseString( aSequencia[2] )
 							TMP->( dbUnlock() )
 
-						ENDDO
+						enddo
 
 					always
 						// Remove a Barra de Progresso
@@ -1936,7 +1935,7 @@ local nMenuItem   := 1
 local nMaxItens   := 0
 local lSair       := pFALSE
 local oWindow
-local bFiltro     := { || TMP->( .not. Eof() ) }
+local bFiltro     := { || .not. TMP->( Eof() ) }
 
 local oSequen1
 local oSequen2
@@ -1962,16 +1961,16 @@ local nGrade
 			aDezenas := Array( nGrade, 10 )
 
 			nPosDezenas := 1
-			FOR nLinDezenas := 1 TO nGrade
-				FOR nColDezenas := 1 TO 10
-					IF nPosDezenas <= Len( pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ] )
+			for nLinDezenas := 1 to nGrade
+				for nColDezenas := 1 to 10
+					If nPosDezenas <= Len( pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ] )
 						aDezenas[ nLinDezenas ][ nColDezenas ] := pSTRU_SYSTEM[ nPointer ][ pSTRU_DEZENAS ][ nPosDezenas ]
-					ELSE
+					Else
 						aDezenas[ nLinDezenas ][ nColDezenas ] := '  '
-					ENDIF
+					EndIf
 					nPosDezenas++
-				NEXT
-			NEXT
+				next
+			next
 
 
 			// Cria o Objeto Windows
@@ -2016,7 +2015,7 @@ local nGrade
 				oSequen1               	:= 	TBrowseNew( ( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) + 1 ), oWindow:nLeft+ 1, ;
 														( oWindow:nBottom- 2 ) - ( ( nGrade * 2 ) - 3 ), oWindow:nRight- 1 )
 				oSequen1:skipBlock     	:= 	{ |x,k| ;
-												k := iif( Abs(x) >= IIF( x >= 0,                          ;
+												k := iif( Abs(x) >= iif( x >= 0,                          ;
 																	Len( aDezenas ) - nRow, nRow - 1),    ;
 														iif(x >= 0, Len( aDezenas ) - nRow,1 - nRow), x ) ;
 														, nRow += k, k                                    ;
@@ -2228,13 +2227,13 @@ local nGrade
 								oBrowse:Cargo[ nMenuItem ][1]:SetFocus()
 
 							case nKey == K_MWFORWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 									oBrowse:up()
 								EndIf
 
 							case nKey == K_MWBACKWARD
-								if MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
+								If MRow() >= oBrowse:nTop .and. MRow() <= oBrowse:nBottom .and. ;
 									Mcol() >= oBrowse:nTop .and. Mcol() <= oBrowse:nRight
 									oBrowse:down()
 								EndIf	
@@ -2283,7 +2282,7 @@ local cInicio
 local cFinal
 local nCurrent
 local nTotConcurso := 0
-local bFiltro      := { || CONCURSO->CON_JOGO == pDUPLA_SENA .and. CONCURSO->( .not. Eof() ) }
+local bFiltro      := { || CONCURSO->CON_JOGO == pDUPLA_SENA .and. .not. CONCURSO->( Eof() ) }
 local oBarProgress
 local oPDFReport
 local nLinha
@@ -2296,7 +2295,7 @@ local nLinha
 
 		// Totaliza a quantidade de registro cadastrados
 		CONCURSO->( dbEval( { || nTotConcurso++ }, bFiltro ) )
-		if nTotConcurso >= 1
+		If nTotConcurso >= 1
 
 			cInicio	:= StrZero( 1, 5 )
 			cFinal  := StrZero( nTotConcurso, 5 )
@@ -2310,7 +2309,7 @@ local nLinha
 			oWindow:cHeader := ' Impressao Resultados '
 			oWindow:Open()
 
-			WHILE lContinua
+			while lContinua
 
 				@ oWindow:nBottom- 3, oWindow:nLeft+ 10 GET     cInicio                                        ;
 														PICT    '@K! 99999'                                    ;
@@ -2348,13 +2347,13 @@ local nLinha
 
 				Set( _SET_CURSOR, SC_NONE )
 
-				IF lContinua .and. LastKey() != K_ESC
+				If lContinua .and. LastKey() != K_ESC
 
 					dbSelectArea('CONCURSO')
-					IF CONCURSO->( dbSetOrder(1), dbSeek( pDUPLA_SENA + cInicio ) ) .and. ;
+					If CONCURSO->( dbSetOrder(1), dbSeek( pDUPLA_SENA + cInicio ) ) .and. ;
 						CONCURSO->( dbSetOrder(1), dbSeek( pDUPLA_SENA + cFinal ) )
 
-						bFiltro := { || CONCURSO->CON_JOGO == pDUPLA_SENA .and. CONCURSO->( .not. Eof() ) .and. ;
+						bFiltro := { || CONCURSO->CON_JOGO == pDUPLA_SENA .and. .not. CONCURSO->( Eof() ) .and. ;
 										CONCURSO->CON_CONCUR >= cInicio .and. CONCURSO->CON_CONCUR  <= cFinal }
 
 						// Totaliza a quantidade de registro cadastrados
@@ -2431,7 +2430,7 @@ local nLinha
 
 								enddo
 
-							endif
+							EndIf
 
 						always
 							oPDFReport:end()
@@ -2447,13 +2446,13 @@ local nLinha
 
 					EndIf
 
-				endif
+				EndIf
 
 			enddo
 
-		else
+		Else
 			ErrorTable( '107' )  // Nao existem informacoes a serem impressas.
-		endif
+		EndIf
 
 	always
 		// Fecha o Objeto Windows
@@ -2483,74 +2482,74 @@ return
 */
 STATIC PROCEDURE LMGeraCombina( cAposta, dSorteio, nValor, aDezenas, nQuantDezenas, aCombine, nElement )
 
-LOCAL nPos
-LOCAL nCurCodigo
-LOCAL nPosCombine
-LOCAL aValue      := {}
-LOCAL lFound
+local nPos
+local nCurCodigo
+local nPosCombine
+local aValue      := {}
+local lFound
 
 
 	DEFAULT aCombine TO {}
 	DEFAULT nElement TO 1
 	
-	IF Len( aCombine ) == 0
-		aCombine    := ARRAY( nQuantDezenas, 0 )
+	If Len( aCombine ) == 0
+		aCombine    := Array( nQuantDezenas, 0 )
 		nPosCombine := nElement
-	ELSE
+	Else
 		nPosCombine := nElement + 1
-	ENDIF
+	EndIf
 	
-	WHILE pTRUE
+	while pTRUE
 		
-		IF nPosCombine <= nQuantDezenas
+		If nPosCombine <= nQuantDezenas
 			
-			FOR nPos := 1 TO Len( aDezenas )
+			for nPos := 1 to Len( aDezenas )
 				SCROLL( MAXROW()- 10, 1, MAXROW()- 1, 5, 1 )
 				SETPOS( MAXROW()- 1, 1 )
-				DEVOUT( STRZERO( nPosCombine, 2 ) + '-' + aDezenas[ nPos ] )
+				DEVOUT( StrZero( nPosCombine, 2 ) + '-' + aDezenas[ nPos ] )
 				lFound := pFALSE
-				AEVAL( aCombine, { |xItem| IIF( ASCAN( xItem, aDezenas[ nPos ] ) > 0, lFound := pTRUE, Nil ) }, 1, nPosCombine )
-				IF .NOT. lFound
-					AADD( aCombine[ nPosCombine ], aDezenas[ nPos ] )
-					IF nPosCombine <= nQuantDezenas
+				AEval( aCombine, { |xItem| iif( AScan( xItem, aDezenas[ nPos ] ) > 0, lFound := pTRUE, Nil ) }, 1, nPosCombine )
+				If .not. lFound
+					AAdd( aCombine[ nPosCombine ], aDezenas[ nPos ] )
+					If nPosCombine <= nQuantDezenas
 						LMGeraCombina( cAposta, dSorteio, nValor, aDezenas, nQuantDezenas, aCombine, nPosCombine )
-					ENDIF
-				ENDIF
-			NEXT
+					EndIf
+				EndIf
+			next
 			
 			// Elimina Itens do vetor
-			FOR nPos := Len( aCombine[ nPosCombine ] ) TO 1 STEP -1
-				ADEL( aCombine[ nPosCombine ], nPos )
-				ASIZE( aCombine[ nPosCombine ], Len( aCombine[ nPosCombine ] ) -1 )
-			NEXT
-			EXIT
+			for nPos := Len( aCombine[ nPosCombine ] ) to 1 step -1
+				ADel( aCombine[ nPosCombine ], nPos )
+				ASize( aCombine[ nPosCombine ], Len( aCombine[ nPosCombine ] ) -1 )
+			next
+			exit
 			
-		ELSE
+		Else
 			// Forma a sequencia das combinacoes
-			AEVAL( aCombine, { |xItem| AADD( aValue, ATAIL( xItem ) ) } )
+			AEval( aCombine, { |xItem| AAdd( aValue, ATail( xItem ) ) } )
 			
 			// Gera o numero da aposta a ser gravada no arquivo temporario
 			nCurCodigo := 1
-			WHILE TMP->( DBSeek( STRZERO( nCurCodigo, 7 ) ) )
+			while TMP->( dbSeek( StrZero( nCurCodigo, 7 ) ) )
 				nCurCodigo++
-			ENDDO
+			enddo
 			
-			BEGIN SEQUENCE
+			begin sequence
 			
 				TMP->( NetAppend() )
 				TMP->TMP_JOGO    := SystemConcurso()
-				TMP->TMP_CODIGO  := STRZERO( nCurCodigo, 7 )
+				TMP->TMP_CODIGO  := StrZero( nCurCodigo, 7 )
 				TMP->TMP_APOSTA  := cAposta
 				TMP->TMP_SORTEI  := dSorteio
 				TMP->TMP_VALOR   := nValor
 				TMP->TMP_DEZENA  := ParseString( aValue )
-				TMP->( DBUnLock() )
-				
-			END SEQUENCE
-			
-			EXIT
-		ENDIF
-		
-	ENDDO
-			
-RETURN
+				TMP->( dbUnlock() )
+
+			end sequence
+			exit
+
+		EndIf
+
+	enddo
+
+return

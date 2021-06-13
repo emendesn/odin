@@ -91,9 +91,9 @@
 #XTRANSLATE pDSA_PREMIO_2_SENA                          => aDuplaSena\[ pDSA_POS_DADOS ]\[ pDSA_POS_DADOS_ACER_2_6 ]\[ 2\]
 
 
-#XTRANSLATE xInitDuplaSena                              => ( aDuplaSena := { ,, {   Array( 6 ), Array( 6 ),                                          ;
-                                                                                    Array( 2 ), Array( 2 ), Array( 2 ), Array( 2 ),                  ;
-                                                                                    Array( 2 ), Array( 2 ), Array( 2 ), Array( 2 )                   ;
+#XTRANSLATE xInitDuplaSena                              => ( aDuplaSena := { ,, {   Array(6), Array(6),                                              ;
+                                                                                    Array(2), Array(2), Array(2), Array(2),                          ;
+                                                                                    Array(2), Array(2), Array(2), Array(2)                           ;
                                                                                 }                                                                    ;
                                                                             }                                                                        ;
                                                             ) 
