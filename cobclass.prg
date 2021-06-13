@@ -84,7 +84,7 @@ QN - 24.040.016
 *            :aSequencia      - Relacao dos valores a serem analisados
 *            :nQuantSequencia - Quantidade de Grupos de dezenas a serem combinadas
 *            :nCorrente       - Valor do registro corrente processado
-*            :nPercencutal    - Percentual realizado
+*            :nPercentual     - Percentual realizado
 *            :nTotal          - Quantidade Total de registros a serem gerados
 *            :lStop           - Variavel informando a parada da execucao da rotina
 *            :aDicionario     - Dicionario interno para controle das sequencias combinadas
@@ -127,7 +127,7 @@ CREATE CLASS hbCombina
 		VAR aSequencia        AS ARRAY     INIT {}
 		VAR nQuantSequencia   AS NUMERIC   INIT 0
 		VAR nCorrente         AS NUMERIC   INIT 0
-		VAR nPercencutal      AS NUMERIC   INIT 0
+		VAR nPercentual       AS NUMERIC   INIT 0
 		VAR nTotal            AS NUMERIC   INIT 0
 		VAR lStop             AS LOGICAL   INIT pFALSE
 
@@ -170,7 +170,7 @@ END CLASS
 
 /***
 *
-*	:New( aSequencia, nQuantidade ) --> Self
+*	:New( aSequencia, nQuantSequencia ) --> Self
 *
 *	Metodo utilizado para a criacao do objeto
 *
@@ -212,7 +212,7 @@ local oErrLocal
 		ordCreate( ::cIndTmp, 'COD_COB', 'COB_CODCOM', {|| FIELD->COB_CODCOM } )
 		
 	recover using oErrLocal
-		IF oErrLocal:genCode != 0
+		If oErrLocal:genCode != 0
 			::lErrComb := pTRUE
 			::cErrComb := oErrLocal:description
 		EndIf
@@ -293,8 +293,8 @@ local nPos
 					::ControlThread( { || ::UpdateTmp() } )
 				enddo
 
-				::Log(  , 'FINALIZOU AS TASKS - Pointer:' + alltrim( str( ::nPointer ) ) )
-				::Log(  , 'FINALIZOU AS TASKS - Pointer:' + alltrim( str( len( ::aCache ) ) ) )				
+				::Log(  , 'FINALIZOU AS TASKS - Pointer:' + AllTrim( Str( ::nPointer ) ) )
+				::Log(  , 'FINALIZOU AS TASKS - Pointer:' + AllTrim( Str( Len( ::aCache ) ) ) )				
 
 			EndIf
 
@@ -324,6 +324,7 @@ METHOD PROCEDURE Processa() CLASS hbCombina
 
 local lFound
 local nPos
+local nLen
 local lWaitWrtCache := pTRUE
 local cDezena
 
@@ -348,7 +349,8 @@ local cDezena
 			next
 			
 			// Elimina Itens do vetor
-			for nPos := Len( ::aDicionario[ ::nPointer ] ) to 1 step -1
+			nLen := Len( ::aDicionario[ ::nPointer ] )
+			for nPos := nLen to 1 step -1
 				ADel( ::aDicionario[ ::nPointer ], nPos )
 				ASize( ::aDicionario[ ::nPointer ], Len( ::aDicionario[ ::nPointer ] ) -1 )
 			next
@@ -358,7 +360,7 @@ local cDezena
 		Else
 			
 			while lWaitWrtCache
-				//IF HB_ISARRAY( ::CacheComb ) .OR. Len( ::CacheComb ) < ::MaxCacheComb
+				//If HB_ISARRAY( ::CacheComb ) .or. Len( ::CacheComb ) < ::MaxCacheComb
 				// Atualiza o array aCache com a sequencia gerada
 				If Len( ::aCache ) < ::nMaxCache
 					If hb_mutexLock( ::mLockCache )
@@ -376,7 +378,7 @@ local cDezena
 						::Log( 1 )
 						
 						lWaitWrtCache := pFALSE
-						hb_dispOutAt( MaxRow() - 2, 1, PADL( 'COMB: '+alltrim(str(len( ::aCache )))+'/'+alltrim(str(len(::aDicionario))), 25 ))
+						hb_dispOutAt( MaxRow() - 2, 1, PadL( 'COMB: '+AllTrim(Str(Len( ::aCache )))+'/'+AllTrim(Str(Len(::aDicionario))), 25 ))
 						
 					EndIf
 				EndIf
@@ -403,10 +405,11 @@ METHOD PROCEDURE UpdateTmp() CLASS hbCombina
 local nPos
 local oErrLocal
 local nHandle
+local nLen
 
-	::Log(  , 'ENTROU NO UPDATE - Cache:' + alltrim(str(len(::aCache))) )
-	::Log(  , 'ENTROU NO UPDATE - MaxCache:' + alltrim(str(::nMaxCache)) )
-	::Log(  , 'ENTROU NO UPDATE - Pointer:' + alltrim(str(::nPointer)) )	
+	::Log(  , 'ENTROU NO UPDATE - Cache:' + AllTrim(Str(Len(::aCache))) )
+	::Log(  , 'ENTROU NO UPDATE - MaxCache:' + AllTrim(Str(::nMaxCache)) )
+	::Log(  , 'ENTROU NO UPDATE - Pointer:' + AllTrim(Str(::nPointer)) )	
 
 	// Verifica se existe conteudo na variavel de Cache
 	If Len( ::aCache ) >= ::nMaxCache .or. ::nPointer = 0
@@ -420,9 +423,10 @@ local nHandle
 				dbUseArea( pTRUE,, ::cFileTmp, 'TMP', pTRUE )
 				ordCreate( ::cIndTmp, 'COD_COB', 'COB_CODCOM', {|| FIELD->COB_CODCOM } )		
 
-				for nPos := Len( ::aCache ) to 1 step -1
+				nLen := Len( ::aCache )
+				for nPos := nLen to 1 step -1
 
-					hb_dispOutAt( MaxRow() - 1, 1, PADL( 'COMB GRV: '+alltrim(str(nPos))+'/'+alltrim(str(len(::aCache))), 25 ))
+					hb_dispOutAt( MaxRow() - 1, 1, PadL( 'COMB GRV: '+AllTrim(Str(nPos))+'/'+AllTrim(Str(Len(::aCache))), 25 ))
 				
 					TMP->( dbAppend() )
 					TMP->COB_CODCOM := StrZero( ::aCache[ nPos ][1], 14 )
@@ -509,24 +513,24 @@ local cFile  := hb_DirBase() + 'log.txt'
 local cWrite := DToS( Date() ) + '-' + Time() + '-'
 
 	DEFAULT nProc TO 0, ;
-	        cDados to ''
+			cDados to ''
 
 	do case
 		case nProc == 1
-			cWrite += 'PROCESSA - '  + alltrim( cDados ) + Chr(13) + Chr(10)
+			cWrite += 'PROCESSA - '  + AllTrim( cDados ) + Chr(13) + Chr(10)
 		case nProc == 2
-			cWrite += 'GRAVA - ' + alltrim( cDados ) + Chr(13) + Chr(10)
+			cWrite += 'GRAVA - ' + AllTrim( cDados ) + Chr(13) + Chr(10)
 		otherwise
-			cWrite += 'GRAVA - ' + alltrim( cDados ) + Chr(13) + Chr(10)
+			cWrite += 'GRAVA - ' + AllTrim( cDados ) + Chr(13) + Chr(10)
 	end case
 
-	if .not. file( cFile )
+	If .not. File( cFile )
 		FCreate( cFile )
 	EndIf
 
-	if ( nHandle := fopen( cFile, FO_READWRITE + FO_SHARED ) ) > 0
+	If ( nHandle := fopen( cFile, FO_READWRITE + FO_SHARED ) ) > 0
 		FSeek( nHandle, 0, FS_END )
-		FWrite( nHandle, alltrim(cWrite), Len( alltrim(cWrite)) )
+		FWrite( nHandle, AllTrim(cWrite), Len( AllTrim(cWrite)) )
 		FClose( nHandle )
 	EndIf
 
@@ -603,10 +607,12 @@ METHOD ParseString( aArray ) CLASS hbCombina
 
 local cRetValue := ''
 local nCount    := 0
+local nLen
 
 
 	If HB_ISARRAY( aArray ) .and. Len( aArray ) > 0
-		for nCount := 1 to Len( aArray )
+		nLen := Len( aArray )
+		for nCount := 1 to nLen
 			cRetValue += aArray[ nCount ]
 			cRetValue += iif( Len( aArray ) > nCount, '-', '' )
 		next
@@ -626,7 +632,7 @@ METHOD GetNextFile() CLASS hbCombina
 
 local cRetValue := ''
 
-	while file( cRetValue := hb_DirBase() + StrZero( hb_RandInt( 99999999 ), 8 ) + '.tmp' ) 
+	while File( cRetValue := hb_DirBase() + StrZero( hb_RandInt( 99999999 ), 8 ) + '.tmp' ) 
 	enddo
 
 return cRetValue
@@ -732,7 +738,7 @@ local oErrLocal
 		ordCreate( ::cIndFileGrp, 'COD_GRP', 'GRP_CODGRP+GRP_CODCOM', {|| FIELD->GRP_CODGRP + FIELD->GRP_CODCOM } )
 
 	recover using oErrLocal
-		IF oErrLocal:genCode != 0
+		If oErrLocal:genCode != 0
 			::lErrComb := pTRUE
 			::cErrComb := oErrLocal:description
 		EndIf
@@ -763,7 +769,7 @@ local oErrLocal
 		ordCreate( ::cIndFileCob, 'COD_COB', 'COB_CODCOM', {|| FIELD->COB_CODCOM } )
 		
 	recover using oErrLocal
-		IF oErrLocal:genCode != 0
+		If oErrLocal:genCode != 0
 			::lErrComb := pTRUE
 			::cErrComb := oErrLocal:description
 		EndIf
@@ -824,14 +830,18 @@ local nPos
 
 					// Controla a inicializacao das threads
 					If .not. ::lIsExecuting .and. .not. ::lErrComb
+
+// Desabilita a execucao da Thread em DEBUG
+#if __pragma( DEBUGINFO )						
 						::GeraComb()
 						::GeraGrup()
 
 						::CommitComb()
 						::CommitGrup()
-
-						//::ControleThread( { || ::GeraComb() } )
-						//::ControleThread( { || ::GeraGrup() } )
+#else
+						::ControleThread( { || ::GeraComb() } )
+						::ControleThread( { || ::GeraGrup() } )
+#endif
 						::lIsExecuting := pTRUE
 					EndIf
 
@@ -942,7 +952,7 @@ local lFound
 local nPos
 local lWaitWrtCache := pTRUE
 local cDezena
-local nMemory := Memory( HB_MEM_STACK )
+
 
 	while pTRUE
 		
@@ -974,7 +984,7 @@ local nMemory := Memory( HB_MEM_STACK )
 		Else
 			
 			while lWaitWrtCache
-				//IF HB_ISARRAY( ::CacheComb ) .OR. Len( ::CacheComb ) < ::MaxCacheComb
+				//If HB_ISARRAY( ::CacheComb ) .or. Len( ::CacheComb ) < ::MaxCacheComb
 				If Len( ::aCacheComb ) < ::nMaxCacheComb
 					If hb_mutexLock( ::mtxCombOcu )
 						// Atualiza a Variavel com o registro corrente Processado
@@ -988,7 +998,7 @@ local nMemory := Memory( HB_MEM_STACK )
 						hb_mutexUnlock( ::mtxCombOcu )
 						
 						lWaitWrtCache := pFALSE
-						hb_dispOutAt( MaxRow() - 2, 1, PADL( 'COMB: '+alltrim(str(len( ::aCacheComb )))+'/'+alltrim(str(len(::aDicioComb))), 25 ))
+						hb_dispOutAt( MaxRow() - 2, 1, PadL( 'COMB: '+AllTrim(Str(Len( ::aCacheComb )))+'/'+AllTrim(Str(Len(::aDicioComb))), 25 ))
 						
 					EndIf
 				EndIf
@@ -1056,7 +1066,7 @@ local lWaitWrtCache := pTRUE
 						hb_mutexUnlock( ::mtxGrupOcu )
 
 						lWaitWrtCache := pFALSE
-						hb_dispOutAt( MaxRow() - 2, 50, PADL('GRUPOS: '+alltrim(str(len( ::aCacheGrup ))) + '/' + alltrim(str(len(::aDicioGrup))), 25 ))
+						hb_dispOutAt( MaxRow() - 2, 50, PadL('GRUPOS: '+AllTrim(Str(Len( ::aCacheGrup ))) + '/' + AllTrim(Str(Len(::aDicioGrup))), 25 ))
 
 					EndIf
 				EndIf
@@ -1119,18 +1129,18 @@ local nHandle
 
 				for nPos := Len( ::aCacheComb ) to 1 step -1
 
-					hb_dispOutAt( MaxRow() - 1, 1, PADL( 'COMB GRV: '+alltrim(str(nPos))+'/'+alltrim(str(len(::CacheComb))), 25 ))
+					hb_dispOutAt( MaxRow() - 1, 1, PadL( 'COMB GRV: '+AllTrim(Str(nPos))+'/'+AllTrim(Str(Len(::CacheComb))), 25 ))
 				
 					TMP_COMBINA->( dbAppend() )
 					TMP_COMBINA->COB_CODCOM := StrZero( ::aCacheComb[ nPos ][1], 14 )
 					TMP_COMBINA->COB_DEZENA := ::ParseString( ::aCacheComb[ nPos ][2] )
 					TMP_COMBINA->( dbUnlock() )
 
-					if .not. file( '/home/edilson/odin/combina.txt' )
+					If .not. File( '/home/edilson/odin/combina.txt' )
 						FCreate( '/home/edilson/odin/combina.txt' )
 					EndIf
 
-					if ( nHandle := fopen( '/home/edilson/odin/combina.txt' ) ) > 0
+					If ( nHandle := fopen( '/home/edilson/odin/combina.txt' ) ) > 0
 						FSeek( nHandle, 0, 2 )
 						fwrite( nHandle, TMP_COMBINA->COB_CODCOM + '-' + TMP_COMBINA->COB_DEZENA + Chr(13) + Chr(10 ))
 						FClose( nHandle )
@@ -1171,32 +1181,32 @@ local oErrLocal
 local nHandle
 
 	// Verifica se existe conteudo na variavel de Cache
-	If Len( ::aCacheGrup ) >= ::nMaxCacheGrup .OR. ::nPointerGrup == 0
+	If Len( ::aCacheGrup ) >= ::nMaxCacheGrup .or. ::nPointerGrup == 0
 		
 		begin sequence with { |oErr| Break( oErr ) }
 		
 			If hb_mutexLock( ::mtxGrupOcu )
 				
-				for nPos := Len( ::aCacheGrup ) TO 1 STEP -1
+				for nPos := Len( ::aCacheGrup ) to 1 step -1
 				
-					hb_dispOutAt( MaxRow() - 1, 50, PADL('GRUP GRV: '+alltrim(str(nPos))+'/'+alltrim(str(len( ::CacheGrup ))), 25 ))				
+					hb_dispOutAt( MaxRow() - 1, 50, PadL('GRUP GRV: '+AllTrim(Str(nPos))+'/'+AllTrim(Str(Len( ::CacheGrup ))), 25 ))				
 					
 					If Len( ::CacheGrup[ nPos ][2] ) > 0
 						for nCount := Len( ::aCacheGrup[ nPos ][2] ) to 1 step -1
 						
-							if TMP_GRUPOS->( dbseek( STRZERO( ::CacheGrup[ nPos ][2][ nCount ], 14 ) ) )
+							If TMP_GRUPOS->( dbSeek( StrZero( ::CacheGrup[ nPos ][2][ nCount ], 14 ) ) )
 								
 								TMP_GRUPOS->( dbAppend() )
-								TMP_GRUPOS->GRP_CODGRP := STRZERO( ::CacheGrup[ nPos ][1], 15 )
+								TMP_GRUPOS->GRP_CODGRP := StrZero( ::CacheGrup[ nPos ][1], 15 )
 								TMP_GRUPOS->GRP_CODCOM := TMP_COMBINA->COB_CODCOM
 								TMP_GRUPOS->GRP_DEZENA := TMP_COMBINA->COB_DEZENA
 								TMP_GRUPOS->( dbUnlock() )
 
-								if .not. file( '/home/edilson/odin/grupo.txt' )
+								If .not. File( '/home/edilson/odin/grupo.txt' )
 									FCreate( '/home/edilson/odin/grupo.txt' )
 								EndIf
 
-								if ( nHandle := fopen( '/home/edilson/odin/grupo.txt' ) ) > 0
+								If ( nHandle := fopen( '/home/edilson/odin/grupo.txt' ) ) > 0
 									FSeek( nHandle, 0, 2 )
 									fwrite( nHandle, TMP_GRUPOS->GRP_CODCOM + '-' + TMP_GRUPOS->GRP_DEZENA + Chr(13) + Chr(10 ))
 									FClose( nHandle )
@@ -1214,23 +1224,23 @@ local nHandle
 					ADel( ::aCacheGrup, nPos )
 					ASize( ::aCacheGrup, Len( ::aCacheGrup ) -1 )
 
-/*					ELSE
-						ADEL( ::CacheGrup, nPos )
-						ASIZE( ::CacheGrup, Len( ::CacheGrup ) -1 )
-					ENDIF */
+/*					Else
+						ADel( ::CacheGrup, nPos )
+						ASize( ::CacheGrup, Len( ::CacheGrup ) -1 )
+					EndIf */
 					
-				NEXT
+				next
 				hb_mutexUnlock( ::mtxGrupOcu )
-			ENDIF
+			EndIf
 		
 		RECOVER USING oErrLocal
-			IF oErrLocal:genCode != 0
+			If oErrLocal:genCode != 0
 				::lErrGrup := pTRUE
 				::cErrGrup := oErrLocal:description
-			ENDIF
+			EndIf
 		END SEQUENCE
 		
-	ENDIF
+	EndIf
 								
 return
 
