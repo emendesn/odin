@@ -9,10 +9,10 @@
 *
 */
 
-#require "hbhpdf"
+#require 'hbhpdf'
 
-#include "hbclass.ch"
-#include "inkey.ch"
+#include 'hbclass.ch'
+#include 'inkey.ch'
 
 #define PDF_PORTRAIT                        1
 #define PDF_LANDSCAPE                       2
@@ -64,11 +64,11 @@ CREATE CLASS PDFClass
    EXPORTED:
       VAR    oPdf        AS OBJECT
       VAR    oPage       AS OBJECT
-      VAR    cFileName   AS CHARACTER INIT ""
+      VAR    cFileName   AS CHARACTER INIT ''
       VAR    nRow        AS NUMERIC   INIT 999
       VAR    nCol        AS NUMERIC   INIT 0
       VAR    nAngle      AS NUMERIC   INIT 0
-      VAR    cFontName   AS CHARACTER INIT "Courier"
+      VAR    cFontName   AS CHARACTER INIT 'Courier'
       VAR    nFontSize   AS NUMERIC   INIT 9
       VAR    nLineHeight AS NUMERIC   INIT 1.3
       VAR    nMargin     AS NUMERIC   INIT 30
@@ -76,7 +76,7 @@ CREATE CLASS PDFClass
       VAR    nPdfPage    AS NUMERIC   INIT 0
       VAR    nPageNumber AS NUMERIC   INIT 0
       VAR    cHeader     AS CHARACTER INIT {}
-      VAR    cCodePage   AS CHARACTER INIT "CP1252"
+      VAR    cCodePage   AS CHARACTER INIT 'CP1252'
 
    METHOD AddPage()
    METHOD RowToPDFRow( nRow )
@@ -111,23 +111,23 @@ METHOD PROCEDURE Begin() CLASS PDFClass
 
    If ::nType > 2
       If Empty( ::cFileName )
-         ::cFileName := MyTempFile( "LST" )
+         ::cFileName := MyTempFile( 'LST' )
       EndIf
       SET PRINTER TO ( ::cFileName )
       SET DEVICE TO PRINT
    Else
-      IF Empty( ::cFileName )
-         ::cFileName := MyTempFile( "PDF" )
+      If Empty( ::cFileName )
+         ::cFileName := MyTempFile( 'PDF' )
       EndIf
       ::oPdf := HPDF_New()
       HPDF_SetCompressionMode( ::oPdf, HPDF_COMP_ALL )
 
       #ifdef __PLATFORM_WINDOWS
-         ::cFontName := HPDF_LoadTTFontFromFile( ::oPDF, "c:\windows\fonts\cour.ttf", .t. )
+         ::cFontName := HPDF_LoadTTFontFromFile( ::oPDF, 'c:\windows\fonts\cour.ttf', .t. )
       #endif
 
       #ifdef __PLATAFORM__LINUX
-         ::cFontName := HPDF_LoadTTFontFromFile( ::oPDF, "/usr/share/fonts/lucon.ttf", .t. )
+         ::cFontName := HPDF_LoadTTFontFromFile( ::oPDF, '/usr/share/fonts/lucon.ttf', .t. )
       #endif
 
       If .not. HB_ISNIL( ::cCodePage )
@@ -143,12 +143,12 @@ METHOD PROCEDURE End() CLASS PDFClass
    If ::nType > 2
       SET DEVICE TO SCREEN
       SET PRINTER TO
-      RUN ( "cmd /c start notepad.exe " + ::cFileName )
+      RUN ( 'cmd /c start notepad.exe ' + ::cFileName )
       FErase( ::cFileName )
    Else
       If ::nPdfPage == 0
          ::AddPage()
-         ::DrawText( 10, 10, "NENHUM CONTEUDO (NO CONTENT)",, ::nFontSize * 2 )
+         ::DrawText( 10, 10, 'NENHUM CONTEUDO (NO CONTENT)',, ::nFontSize * 2 )
       EndIf
       If File( ::cFileName )
          FErase( ::cFileName )
@@ -162,11 +162,11 @@ return
 
 METHOD PROCEDURE SetInfo( cAuthor, cCreator, cTitle, cSubject ) CLASS PDFClass
 
-   IF ::nType <= 2
+   If ::nType <= 2
 
-      cAuthor  := iif( cAuthor == NIL, "Edilson Mendes", cAuthor )
-      cCreator := iif( cCreator == NIL, "Odin", cCreator )
-      cTitle   := iif( cTitle == NIL, "", cTitle )
+      cAuthor  := iif( cAuthor == NIL, 'Edilson Mendes', cAuthor )
+      cCreator := iif( cCreator == NIL, 'Odin', cCreator )
+      cTitle   := iif( cTitle == NIL, '', cTitle )
       cSubject := iif( cSubject == NIL, cTitle, cSubject )
 
       HPDF_SetInfoAttr( ::oPDF, HPDF_INFO_AUTHOR, cAuthor )
@@ -176,7 +176,7 @@ METHOD PROCEDURE SetInfo( cAuthor, cCreator, cTitle, cSubject ) CLASS PDFClass
       HPDF_SetInfoDateAttr(   Year( Date() ), Month( Date() ), Day( Date() ), ;
                               Val( Substr( Time(), 1, 2 ) ), ;
                               Val( Substr( Time(), 4, 2 ) ), ;
-                              Val( Substr( Time(), 7, 2 ) ), "+", 4, 0 )
+                              Val( Substr( Time(), 7, 2 ) ), '+', 4, 0 )
 
    EndIf
 
@@ -221,7 +221,7 @@ local cTexto
 
    nFontSize := iif( nFontSize == NIL, ::nFontSize, nFontSize )
    cFontName := iif( cFontName == NIL, ::cFontName, cFontName )
-   cPicture  := iif( cPicture == NIL, "", cPicture )
+   cPicture  := iif( cPicture == NIL, '', cPicture )
    nAngle    := iif( nAngle == NIL, ::nAngle, nAngle )
    cTexto    := Transform( xValue, cPicture )
 
@@ -256,7 +256,7 @@ METHOD PROCEDURE DrawLine( nRowi, nColi, nRowf, nColf, nPenSize ) CLASS PDFClass
    If ::nType > 2
       nRowi := Round( nRowi, 0 )
       nColi := Round( nColi, 0 )
-      @ nRowi, nColi SAY Replicate( "-", nColf - nColi )
+      @ nRowi, nColi SAY Replicate( '-', nColf - nColi )
       ::nCol := Col()
    Else
       nPenSize := iif( nPenSize == NIL, 0.2, nPenSize )
@@ -283,9 +283,9 @@ local oImage
       nCol    := ::ColToPDFCol( nCol )
       nWidth  := Int( nWidth * ::nFontSize / 1.666 )
       nHeight := nHeight * ::nFontSize
-      IF ValType( cJPEGFile ) == "C"
+      If ValType( cJPEGFile ) == 'C'
          oImage := HPDF_LoadJPEGImageFromFile( ::oPdf, cJPEGFile )
-      //ELSE
+      //Else
       //   oImage := HPDF_LoadJPEGImageFromMem( cJPEGFile )
       //   oImage := HPDF_LoadRawImageFromMem() // testar
       EndIf
@@ -298,7 +298,7 @@ return
 
 METHOD PROCEDURE DrawRetangle( nTop, nLeft, nWidth, nHeight, nPenSize, nFillType, anRGB ) CLASS PDFClass
 
-   IF ::nType <= 2
+   If ::nType <= 2
 
       nFillType := iif( nFillType == NIL, 1, nFillType )
       nPenSize  := iif( nPenSize == NIL, 0.2, nPenSize )
@@ -319,7 +319,7 @@ METHOD PROCEDURE DrawRetangle( nTop, nLeft, nWidth, nHeight, nPenSize, nFillType
       Else
          HPDF_Page_FillStroke( ::oPage ) // all
       EndIf
-      IF anRGB != NIL
+      If anRGB != NIL
          HPDF_Page_SetRGBStroke( ::oPage, 0, 0, 0 )
          HPDF_Page_SetRGBFill( ::oPage, 0, 0, 0 )
       EndIf
@@ -347,7 +347,7 @@ local nMaxRow     := 63
       nMaxRow     := Int( nPageHeight / ( ::nFontSize * ::nLineHeight )  )
    EndIf
 
-RETURN nMaxRow
+return nMaxRow
 
 
 METHOD MaxCol() CLASS PDFClass
@@ -398,9 +398,9 @@ METHOD PROCEDURE PageHeader() CLASS PDFClass
    ::nCol        := 0
    ::AddPage()
    If Len( ::cHeader ) != 0
-      ::DrawText( 0, 0, "Odin" )
+      ::DrawText( 0, 0, 'Odin' )
       ::DrawText( 0, ( ::MaxCol() - Len( ::cHeader ) ) / 2, ::cHeader )
-      ::DrawText( 0, ::MaxCol() - 12, "Folha " + StrZero( ::nPageNumber, 6 ) )
+      ::DrawText( 0, ::MaxCol() - 12, 'Folha ' + StrZero( ::nPageNumber, 6 ) )
       ::DrawLine( 0.5, 0, 0.5, ::MaxCol() )
       ::nRow := 2
       ::nCol := 0
@@ -435,8 +435,8 @@ return
 
 
 FUNCTION TxtSaida()
-   return { "PDF Paisagem", "PDF Retrato", "Matricial" }
+   return { 'PDF Paisagem', 'PDF Retrato', 'Matricial' }
 
 
 FUNCTION MyTempFile( cExtensao )
-   return "temp." + cExtensao
+   return 'temp.' + cExtensao
